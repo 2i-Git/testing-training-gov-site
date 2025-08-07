@@ -1,0 +1,78 @@
+{% extends "layout.njk" %}
+{% block content %}
+<div class="govuk-width-container">
+  <h1 class="govuk-heading-xl">Review Applications</h1>
+  
+  {% if error %}
+  <div class="govuk-error-summary" role="alert">
+    <h2 class="govuk-error-summary__title">There is a problem</h2>
+    <div class="govuk-error-summary__body">
+      <ul class="govuk-list govuk-error-summary__list">
+        <li>{{ error }}</li>
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+  
+  {% if success %}
+  <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+    <div class="govuk-notification-banner__header">
+      <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">Success</h2>
+    </div>
+    <div class="govuk-notification-banner__content">
+      <p class="govuk-notification-banner__heading">{{ success }}</p>
+    </div>
+  </div>
+  {% endif %}
+  
+  {% if applications.length == 0 %}
+    <p class="govuk-body">No applications to review.</p>
+  {% else %}
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Applicant</th>
+          <th scope="col" class="govuk-table__header">Status</th>
+          <th scope="col" class="govuk-table__header">Submitted</th>
+          <th scope="col" class="govuk-table__header">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for app in applications %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">{{ app.personalDetails.firstName }} {{ app.personalDetails.lastName }}</td>
+          <td class="govuk-table__cell">
+            {% if app.status == 'approved' %}
+              <strong class="govuk-tag govuk-tag--green">Approved</strong>
+            {% elif app.status == 'rejected' %}
+              <strong class="govuk-tag govuk-tag--red">Rejected</strong>
+            {% elif app.status == 'under-review' %}
+              <strong class="govuk-tag govuk-tag--yellow">Under Review</strong>
+            {% else %}
+              <strong class="govuk-tag govuk-tag--grey">{{ app.status | title }}</strong>
+            {% endif %}
+          </td>
+          <td class="govuk-table__cell">{{ app.submittedAt }}</td>
+          <td class="govuk-table__cell">
+            {% if app.status == 'submitted' or app.status == 'under-review' %}
+              <form method="post" action="/admin/applications/{{ app.applicationId }}/status" style="display:inline; margin-right:10px;">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                <input type="hidden" name="status" value="approved">
+                <button class="govuk-button govuk-button--secondary" type="submit">Accept</button>
+              </form>
+              <form method="post" action="/admin/applications/{{ app.applicationId }}/status" style="display:inline">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                <input type="hidden" name="status" value="rejected">
+                <button class="govuk-button govuk-button--warning" type="submit">Reject</button>
+              </form>
+            {% else %}
+              <span class="govuk-body">Decision made</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</div>
+{% endblock %}

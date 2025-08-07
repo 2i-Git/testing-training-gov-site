@@ -1,0 +1,189 @@
+{% extends "layout.njk" %}
+{% block content %}
+<div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">
+            <strong class="govuk-tag govuk-phase-banner__content__tag">Training</strong>
+            <span class="govuk-phase-banner__text">This is a training application for testing purposes only.</span>
+        </p>
+    </div>
+    <div class="govuk-breadcrumbs">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Start</a></li>
+            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/personal-details">Personal details</a></li>
+            <li class="govuk-breadcrumbs__list-item">Business details</li>
+        </ol>
+    </div>
+    {% if errors and errors.length %}
+    <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+        <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                    {% set fieldId = error.path %}
+                    {% if error.path == 'businessName' %}{% set fieldId = 'business-name' %}{% endif %}
+                    {% if error.path == 'companyNumber' %}{% set fieldId = 'company-number' %}{% endif %}
+                    {% if error.path == 'businessType' %}{% set fieldId = 'business-type-pub' %}{% endif %}
+                    {% if error.path == 'businessAddressLine1' %}{% set fieldId = 'business-address-line-1' %}{% endif %}
+                    {% if error.path == 'businessAddressTown' %}{% set fieldId = 'business-address-town' %}{% endif %}
+                    {% if error.path == 'businessAddressPostcode' %}{% set fieldId = 'business-address-postcode' %}{% endif %}
+                    {% if error.path == 'businessPhone' %}{% set fieldId = 'business-phone' %}{% endif %}
+                    {% if error.path == 'businessEmail' %}{% set fieldId = 'business-email' %}{% endif %}
+                <li><a href="#{{ fieldId }}">{{ error.msg }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <span class="govuk-caption-xl">Step 2 of 4</span>
+                <h1 class="govuk-heading-xl">Business details</h1>
+                <p class="govuk-body">Tell us about the business that will hold the licence.</p>
+                <form id="business-details-form" method="post">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    {% set businessNameError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'businessName' %}
+                            {% set businessNameError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if businessNameError %} govuk-form-group--error{% endif %}">
+                        <label class="govuk-label" for="business-name">Business name</label>
+                        {% if businessNameError %}
+                        <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ businessNameError.msg }}</span>
+                        {% endif %}
+                        <input class="govuk-input{% if businessNameError %} govuk-input--error{% endif %}" id="business-name" name="businessName" type="text" spellcheck="false" value="{{ data.businessName | default('') }}">
+                    </div>
+                    {% set companyNumberError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'companyNumber' %}
+                            {% set companyNumberError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if companyNumberError %} govuk-form-group--error{% endif %}">
+                        <label class="govuk-label" for="company-number">Company registration number (optional)</label>
+                        <div id="company-number-hint" class="govuk-hint">For example, 01234567</div>
+                        {% if companyNumberError %}
+                        <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ companyNumberError.msg }}</span>
+                        {% endif %}
+                        <input class="govuk-input govuk-input--width-10{% if companyNumberError %} govuk-input--error{% endif %}" id="company-number" name="companyNumber" type="text" spellcheck="false" aria-describedby="company-number-hint" value="{{ data.companyNumber | default('') }}">
+                    </div>
+                    {% set businessTypeError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'businessType' %}
+                            {% set businessTypeError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if businessTypeError %} govuk-form-group--error{% endif %}">
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">What type of business is this?</legend>
+                            {% if businessTypeError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ businessTypeError.msg }}</span>
+                            {% endif %}
+                            <div class="govuk-radios" data-module="govuk-radios">
+                                {% set businessTypes = [
+                                    {value: 'pub', label: 'Public house/Pub'},
+                                    {value: 'restaurant', label: 'Restaurant'},
+                                    {value: 'bar', label: 'Bar/Nightclub'},
+                                    {value: 'hotel', label: 'Hotel'},
+                                    {value: 'shop', label: 'Shop/Off-licence'},
+                                    {value: 'other', label: 'Other'}
+                                ] %}
+                                {% for type in businessTypes %}
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="business-type-{{ type.value }}" name="businessType" type="radio" value="{{ type.value }}" {% if data.businessType == type.value %}checked{% endif %}>
+                                    <label class="govuk-label govuk-radios__label" for="business-type-{{ type.value }}">{{ type.label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </fieldset>
+                    </div>
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Business address</legend>
+                        <div id="business-address-hint" class="govuk-hint">This should be the registered address of your business</div>
+                        {% set businessAddressLine1Error = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'businessAddressLine1' %}
+                                {% set businessAddressLine1Error = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if businessAddressLine1Error %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="business-address-line-1">Address line 1</label>
+                            {% if businessAddressLine1Error %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ businessAddressLine1Error.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input{% if businessAddressLine1Error %} govuk-input--error{% endif %}" id="business-address-line-1" name="businessAddressLine1" type="text" value="{{ data.businessAddressLine1 | default('') }}">
+                        </div>
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="business-address-line-2">Address line 2 (optional)</label>
+                            <input class="govuk-input" id="business-address-line-2" name="businessAddressLine2" type="text" value="{{ data.businessAddressLine2 | default('') }}">
+                        </div>
+                        {% set businessAddressTownError = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'businessAddressTown' %}
+                                {% set businessAddressTownError = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if businessAddressTownError %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="business-address-town">Town or city</label>
+                            {% if businessAddressTownError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ businessAddressTownError.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input govuk-input--width-20{% if businessAddressTownError %} govuk-input--error{% endif %}" id="business-address-town" name="businessAddressTown" type="text" value="{{ data.businessAddressTown | default('') }}">
+                        </div>
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="business-address-county">County (optional)</label>
+                            <input class="govuk-input govuk-input--width-20" id="business-address-county" name="businessAddressCounty" type="text" value="{{ data.businessAddressCounty | default('') }}">
+                        </div>
+                        {% set businessAddressPostcodeError = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'businessAddressPostcode' %}
+                                {% set businessAddressPostcodeError = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if businessAddressPostcodeError %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="business-address-postcode">Postcode</label>
+                            {% if businessAddressPostcodeError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ businessAddressPostcodeError.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input govuk-input--width-10{% if businessAddressPostcodeError %} govuk-input--error{% endif %}" id="business-address-postcode" name="businessAddressPostcode" type="text" value="{{ data.businessAddressPostcode | default('') }}">
+                        </div>
+                    </fieldset>
+                    {% set businessPhoneError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'businessPhone' %}
+                            {% set businessPhoneError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if businessPhoneError %} govuk-form-group--error{% endif %}">
+                        <label class="govuk-label" for="business-phone">Business phone number</label>
+                        {% if businessPhoneError %}
+                        <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ businessPhoneError.msg }}</span>
+                        {% endif %}
+                        <input class="govuk-input govuk-input--width-20{% if businessPhoneError %} govuk-input--error{% endif %}" id="business-phone" name="businessPhone" type="tel" value="{{ data.businessPhone | default('') }}">
+                    </div>
+                    {% set businessEmailError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'businessEmail' %}
+                            {% set businessEmailError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if businessEmailError %} govuk-form-group--error{% endif %}">
+                        <label class="govuk-label" for="business-email">Business email address (optional)</label>
+                        {% if businessEmailError %}
+                        <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ businessEmailError.msg }}</span>
+                        {% endif %}
+                        <input class="govuk-input{% if businessEmailError %} govuk-input--error{% endif %}" id="business-email" name="businessEmail" type="email" spellcheck="false" value="{{ data.businessEmail | default('') }}">
+                    </div>
+                    <div class="govuk-button-group">
+                        <button class="govuk-button" data-module="govuk-button">Continue</button>
+                        <a class="govuk-link" href="/personal-details">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

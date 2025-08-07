@@ -1,0 +1,231 @@
+{% extends "layout.njk" %}
+{% block content %}
+<div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">
+            <strong class="govuk-tag govuk-phase-banner__content__tag">Training</strong>
+            <span class="govuk-phase-banner__text">This is a training application for testing purposes only.</span>
+        </p>
+    </div>
+    <div class="govuk-breadcrumbs">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Start</a></li>
+            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/personal-details">Personal details</a></li>
+            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/business-details">Business details</a></li>
+            <li class="govuk-breadcrumbs__list-item">Licence details</li>
+        </ol>
+    </div>
+    {% if errors and errors.length %}
+    <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+        <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                    {% set fieldId = error.path %}
+                    {% if error.path == 'licenseType' %}{% set fieldId = 'license-type-new' %}{% endif %}
+                    {% if error.path == 'premisesType' %}{% set fieldId = 'premises-type-pub' %}{% endif %}
+                    {% if error.path == 'premisesAddressLine1' %}{% set fieldId = 'premises-address-line-1' %}{% endif %}
+                    {% if error.path == 'premisesAddressTown' %}{% set fieldId = 'premises-address-town' %}{% endif %}
+                    {% if error.path == 'premisesAddressPostcode' %}{% set fieldId = 'premises-address-postcode' %}{% endif %}
+                    {% if error.path == 'activities' %}{% set fieldId = 'activity-sale-on' %}{% endif %}
+                <li><a href="#{{ fieldId }}">{{ error.msg }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <span class="govuk-caption-xl">Step 3 of 4</span>
+                <h1 class="govuk-heading-xl">Licence details</h1>
+                <p class="govuk-body">Tell us about the licence you're applying for and the premises.</p>
+                <form id="license-details-form" method="post">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    {% set licenseTypeError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'licenseType' %}
+                            {% set licenseTypeError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if licenseTypeError %} govuk-form-group--error{% endif %}">
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">What type of licence do you need?</legend>
+                            {% if licenseTypeError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ licenseTypeError.msg }}</span>
+                            {% endif %}
+                            <div class="govuk-radios" data-module="govuk-radios">
+                                {% set licenseTypes = [
+                                    {value: 'premises', label: 'Premises licence (to sell alcohol from a specific location)'},
+                                    {value: 'club', label: 'Club premises certificate'},
+                                    {value: 'personal', label: 'Personal licence (to supervise alcohol sales)'}
+                                ] %}
+                                {% for type in licenseTypes %}
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="license-type-{{ type.value }}" name="licenseType" type="radio" value="{{ type.value }}" {% if data.licenseType == type.value %}checked{% endif %}>
+                                    <label class="govuk-label govuk-radios__label" for="license-type-{{ type.value }}">{{ type.label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </fieldset>
+                    </div>
+                    {% set premisesTypeError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'premisesType' %}
+                            {% set premisesTypeError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if premisesTypeError %} govuk-form-group--error{% endif %}">
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">What type of premises is this?</legend>
+                            {% if premisesTypeError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ premisesTypeError.msg }}</span>
+                            {% endif %}
+                            <div class="govuk-radios" data-module="govuk-radios">
+                                {% set premisesTypes = [
+                                    {value: 'pub', label: 'Public house'},
+                                    {value: 'restaurant', label: 'Restaurant'},
+                                    {value: 'bar', label: 'Bar/Wine bar'},
+                                    {value: 'nightclub', label: 'Nightclub'},
+                                    {value: 'hotel', label: 'Hotel'},
+                                    {value: 'off-licence', label: 'Shop/Off-licence'},
+                                    {value: 'supermarket', label: 'Supermarket'},
+                                    {value: 'other', label: 'Other'}
+                                ] %}
+                                {% for type in premisesTypes %}
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="premises-type-{{ type.value }}" name="premisesType" type="radio" value="{{ type.value }}" {% if data.premisesType == type.value %}checked{% endif %}>
+                                    <label class="govuk-label govuk-radios__label" for="premises-type-{{ type.value }}">{{ type.label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </fieldset>
+                    </div>
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Premises address</legend>
+                        <div id="premises-address-hint" class="govuk-hint">This is where you want to sell alcohol</div>
+                        {% set premisesAddressLine1Error = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'premisesAddressLine1' %}
+                                {% set premisesAddressLine1Error = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if premisesAddressLine1Error %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="premises-address-line-1">Address line 1</label>
+                            {% if premisesAddressLine1Error %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ premisesAddressLine1Error.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input{% if premisesAddressLine1Error %} govuk-input--error{% endif %}" id="premises-address-line-1" name="premisesAddressLine1" type="text" value="{{ data.premisesAddressLine1 | default('') }}">
+                        </div>
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="premises-address-line-2">Address line 2 (optional)</label>
+                            <input class="govuk-input" id="premises-address-line-2" name="premisesAddressLine2" type="text" value="{{ data.premisesAddressLine2 | default('') }}">
+                        </div>
+                        {% set premisesAddressTownError = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'premisesAddressTown' %}
+                                {% set premisesAddressTownError = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if premisesAddressTownError %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="premises-address-town">Town or city</label>
+                            {% if premisesAddressTownError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ premisesAddressTownError.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input govuk-input--width-20{% if premisesAddressTownError %} govuk-input--error{% endif %}" id="premises-address-town" name="premisesAddressTown" type="text" value="{{ data.premisesAddressTown | default('') }}">
+                        </div>
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="premises-address-county">County (optional)</label>
+                            <input class="govuk-input govuk-input--width-20" id="premises-address-county" name="premisesAddressCounty" type="text" value="{{ data.premisesAddressCounty | default('') }}">
+                        </div>
+                        {% set premisesAddressPostcodeError = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'premisesAddressPostcode' %}
+                                {% set premisesAddressPostcodeError = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if premisesAddressPostcodeError %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="premises-address-postcode">Postcode</label>
+                            {% if premisesAddressPostcodeError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ premisesAddressPostcodeError.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input govuk-input--width-10{% if premisesAddressPostcodeError %} govuk-input--error{% endif %}" id="premises-address-postcode" name="premisesAddressPostcode" type="text" value="{{ data.premisesAddressPostcode | default('') }}">
+                        </div>
+                    </fieldset>
+                    {% set activitiesError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'activities' %}
+                            {% set activitiesError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if activitiesError %} govuk-form-group--error{% endif %}">
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">What activities will you be licensed for?</legend>
+                            <div id="activities-hint" class="govuk-hint">Select all that apply</div>
+                            {% if activitiesError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ activitiesError.msg }}</span>
+                            {% endif %}
+                            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                                <div class="govuk-checkboxes__item">
+                                    <input class="govuk-checkboxes__input" id="activity-sale-on" name="activities" type="checkbox" value="sale-on" {% if data.activities and 'sale-on' in data.activities %}checked{% endif %}>
+                                    <label class="govuk-label govuk-checkboxes__label" for="activity-sale-on">Sale of alcohol for consumption on the premises</label>
+                                </div>
+                                <div class="govuk-checkboxes__item">
+                                    <input class="govuk-checkboxes__input" id="activity-sale-off" name="activities" type="checkbox" value="sale-off" {% if data.activities and 'sale-off' in data.activities %}checked{% endif %}>
+                                    <label class="govuk-label govuk-checkboxes__label" for="activity-sale-off">Sale of alcohol for consumption off the premises</label>
+                                </div>
+                                <div class="govuk-checkboxes__item">
+                                    <input class="govuk-checkboxes__input" id="activity-regulated-entertainment" name="activities" type="checkbox" value="regulated-entertainment" {% if data.activities and 'regulated-entertainment' in data.activities %}checked{% endif %}>
+                                    <label class="govuk-label govuk-checkboxes__label" for="activity-regulated-entertainment">Provision of regulated entertainment</label>
+                                </div>
+                                <div class="govuk-checkboxes__item">
+                                    <input class="govuk-checkboxes__input" id="activity-late-night-refreshment" name="activities" type="checkbox" value="late-night-refreshment" {% if data.activities and 'late-night-refreshment' in data.activities %}checked{% endif %}>
+                                    <label class="govuk-label govuk-checkboxes__label" for="activity-late-night-refreshment">Provision of late night refreshment</label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="govuk-form-group">
+                        <fieldset class="govuk-fieldset" role="group" aria-describedby="opening-hours-hint">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Operating hours</legend>
+                            <div id="opening-hours-hint" class="govuk-hint">When will you sell alcohol? Use 24 hour format (for example, 09:00 to 23:00)</div>
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="monday-hours">Monday</label>
+                                <input class="govuk-input govuk-input--width-20" id="monday-hours" name="mondayHours" type="text" placeholder="e.g. 10:00 - 22:00" value="{{ data.mondayHours | default('') }}">
+                            </div>
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="tuesday-hours">Tuesday</label>
+                                <input class="govuk-input govuk-input--width-20" id="tuesday-hours" name="tuesdayHours" type="text" placeholder="e.g. 10:00 - 22:00" value="{{ data.tuesdayHours | default('') }}">
+                            </div>
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="wednesday-hours">Wednesday</label>
+                                <input class="govuk-input govuk-input--width-20" id="wednesday-hours" name="wednesdayHours" type="text" placeholder="e.g. 10:00 - 22:00" value="{{ data.wednesdayHours | default('') }}">
+                            </div>
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="thursday-hours">Thursday</label>
+                                <input class="govuk-input govuk-input--width-20" id="thursday-hours" name="thursdayHours" type="text" placeholder="e.g. 10:00 - 22:00" value="{{ data.thursdayHours | default('') }}">
+                            </div>
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="friday-hours">Friday</label>
+                                <input class="govuk-input govuk-input--width-20" id="friday-hours" name="fridayHours" type="text" placeholder="e.g. 10:00 - 23:00" value="{{ data.fridayHours | default('') }}">
+                            </div>
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="saturday-hours">Saturday</label>
+                                <input class="govuk-input govuk-input--width-20" id="saturday-hours" name="saturdayHours" type="text" placeholder="e.g. 10:00 - 23:00" value="{{ data.saturdayHours | default('') }}">
+                            </div>
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="sunday-hours">Sunday</label>
+                                <input class="govuk-input govuk-input--width-20" id="sunday-hours" name="sundayHours" type="text" placeholder="e.g. 12:00 - 22:00" value="{{ data.sundayHours | default('') }}">
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="govuk-button-group">
+                        <button class="govuk-button" data-module="govuk-button">Continue</button>
+                        <a class="govuk-link" href="/business-details">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

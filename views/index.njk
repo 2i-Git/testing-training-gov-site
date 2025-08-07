@@ -1,0 +1,67 @@
+{% extends "layout.njk" %}
+{% block content %}
+<div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">
+            <strong class="govuk-tag govuk-phase-banner__content__tag">Training</strong>
+            <span class="govuk-phase-banner__text">This is a demonstration GOV.UK service for tester training.</span>
+        </p>
+    </div>
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Apply for an alcohol licence</h1>
+                <p class="govuk-body-l">Use this service to apply for a premises licence to sell alcohol.</p>
+                <div class="govuk-inset-text">
+                    <strong>Training Application:</strong> This is a demonstration system for tester training. 
+                    No real licences will be issued.
+                </div>
+                <h2 class="govuk-heading-m">What you'll need</h2>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li>Personal details including date of birth</li>
+                    <li>Business details and address</li>
+                    <li>Details about the premises where alcohol will be sold</li>
+                    <li>Type of licence you're applying for</li>
+                    <li>Operating schedule and hours</li>
+                </ul>
+                <h2 class="govuk-heading-m">Application process</h2>
+                <nav aria-label="Application process" class="govuk-step-nav">
+                    <ol class="govuk-list govuk-list--number">
+                        <li>Personal details</li>
+                        <li>Business details</li>
+                        <li>Licence details</li>
+                        <li>Check your answers</li>
+                        <li>Submit application</li>
+                    </ol>
+                </nav>
+                <div class="govuk-warning-text">
+                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                    <strong class="govuk-warning-text__text">
+                        <span class="govuk-warning-text__assistive">Warning</span>
+                        You must provide accurate information. Providing false information may result in your application being refused.
+                    </strong>
+                </div>
+                <a href="/personal-details" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+                    Start now
+                    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+                        <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="govuk-grid-column-one-third">
+                <div class="app-related-items">
+                    <h2 class="govuk-heading-m">Related content</h2>
+                    <nav role="navigation" aria-labelledby="subsection-title">
+                        <ul class="govuk-list govuk-!-font-size-16">
+                            <li><a href="#" class="govuk-link">Alcohol licensing guidance</a></li>
+                            <li><a href="#" class="govuk-link">Licensing fees</a></li>
+                            <li><a href="#" class="govuk-link">Operating schedule requirements</a></li>
+                            <li><a href="#" class="govuk-link">Designated premises supervisor</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

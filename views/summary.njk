@@ -1,0 +1,265 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+<div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">
+            <strong class="govuk-tag govuk-phase-banner__content__tag">Training</strong>
+            <span class="govuk-phase-banner__text">This is a training application for testing purposes only.</span>
+        </p>
+    </div>
+    <div class="govuk-breadcrumbs">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="/">Start</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="/personal-details">Personal details</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="/business-details">Business details</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="/license-details">Licence details</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item">Check your answers</li>
+        </ol>
+    </div>
+    {% if errors and errors.length %}
+    <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+        <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                <li><a href="#{{ error.path }}">{{ error.msg }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Check your answers before submitting your application</h1>
+                <div class="govuk-inset-text">
+                    Please review all the information you have provided. You can change any details by clicking the 'Change' link next to each section.
+                </div>
+                <h2 class="govuk-heading-m">Personal details</h2>
+                <dl class="govuk-summary-list">
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Name</dt>
+                        <dd class="govuk-summary-list__value">{{ data.firstName }} {{ data.lastName }}</dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/personal-details">Change<span class="govuk-visually-hidden"> name</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Date of birth</dt>
+                        <dd class="govuk-summary-list__value">
+                            {% if data.dobDay and data.dobMonth and data.dobYear %}
+                                {{ data.dobDay }}/{{ data.dobMonth }}/{{ data.dobYear }}
+                            {% endif %}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/personal-details">Change<span class="govuk-visually-hidden"> date of birth</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Email address</dt>
+                        <dd class="govuk-summary-list__value">{{ data.email }}</dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/personal-details">Change<span class="govuk-visually-hidden"> email address</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Phone number</dt>
+                        <dd class="govuk-summary-list__value">{{ data.phoneNumber }}</dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/personal-details">Change<span class="govuk-visually-hidden"> phone number</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Address</dt>
+                        <dd class="govuk-summary-list__value">
+                            {{ data.addressLine1 }}{% if data.addressLine2 %}<br>{{ data.addressLine2 }}{% endif %}
+                            <br>{{ data.addressTown }}{% if data.addressCounty %}<br>{{ data.addressCounty }}{% endif %}
+                            <br>{{ data.addressPostcode }}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/personal-details">Change<span class="govuk-visually-hidden"> address</span></a>
+                        </dd>
+                    </div>
+                </dl>
+                <h2 class="govuk-heading-m">Business details</h2>
+                <dl class="govuk-summary-list">
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Business name</dt>
+                        <dd class="govuk-summary-list__value">{{ data.businessName }}</dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/business-details">Change<span class="govuk-visually-hidden"> business name</span></a>
+                        </dd>
+                    </div>
+                    {% if data.companyNumber %}
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Company registration number</dt>
+                        <dd class="govuk-summary-list__value">{{ data.companyNumber }}</dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/business-details">Change<span class="govuk-visually-hidden"> company number</span></a>
+                        </dd>
+                    </div>
+                    {% endif %}
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Business type</dt>
+                        <dd class="govuk-summary-list__value">
+                            {% if data.businessType == 'pub' %}Public house/Pub
+                            {% elif data.businessType == 'restaurant' %}Restaurant
+                            {% elif data.businessType == 'bar' %}Bar/Nightclub
+                            {% elif data.businessType == 'hotel' %}Hotel
+                            {% elif data.businessType == 'shop' %}Shop/Off-licence
+                            {% elif data.businessType == 'other' %}Other
+                            {% endif %}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/business-details">Change<span class="govuk-visually-hidden"> business type</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Business address</dt>
+                        <dd class="govuk-summary-list__value">
+                            {{ data.businessAddressLine1 }}{% if data.businessAddressLine2 %}<br>{{ data.businessAddressLine2 }}{% endif %}
+                            <br>{{ data.businessAddressTown }}{% if data.businessAddressCounty %}<br>{{ data.businessAddressCounty }}{% endif %}
+                            <br>{{ data.businessAddressPostcode }}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/business-details">Change<span class="govuk-visually-hidden"> business address</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Business phone</dt>
+                        <dd class="govuk-summary-list__value">{{ data.businessPhone }}</dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/business-details">Change<span class="govuk-visually-hidden"> business phone</span></a>
+                        </dd>
+                    </div>
+                    {% if data.businessEmail %}
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Business email</dt>
+                        <dd class="govuk-summary-list__value">{{ data.businessEmail }}</dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/business-details">Change<span class="govuk-visually-hidden"> business email</span></a>
+                        </dd>
+                    </div>
+                    {% endif %}
+                </dl>
+                <h2 class="govuk-heading-m">Licence details</h2>
+                <dl class="govuk-summary-list">
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Licence type</dt>
+                        <dd class="govuk-summary-list__value">
+                            {% if data.licenseType == 'premises' %}Premises licence (to sell alcohol from a specific location)
+                            {% elif data.licenseType == 'club' %}Club premises certificate
+                            {% elif data.licenseType == 'personal' %}Personal licence (to supervise alcohol sales)
+                            {% endif %}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/license-details">Change<span class="govuk-visually-hidden"> licence type</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Premises type</dt>
+                        <dd class="govuk-summary-list__value">
+                            {% if data.premisesType == 'pub' %}Public house
+                            {% elif data.premisesType == 'restaurant' %}Restaurant
+                            {% elif data.premisesType == 'bar' %}Bar/Wine bar
+                            {% elif data.premisesType == 'nightclub' %}Nightclub
+                            {% elif data.premisesType == 'hotel' %}Hotel
+                            {% elif data.premisesType == 'off-licence' %}Shop/Off-licence
+                            {% elif data.premisesType == 'supermarket' %}Supermarket
+                            {% elif data.premisesType == 'other' %}Other
+                            {% endif %}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/license-details">Change<span class="govuk-visually-hidden"> premises type</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Premises address</dt>
+                        <dd class="govuk-summary-list__value">
+                            {{ data.premisesAddressLine1 }}{% if data.premisesAddressLine2 %}<br>{{ data.premisesAddressLine2 }}{% endif %}
+                            <br>{{ data.premisesAddressTown }}{% if data.premisesAddressCounty %}<br>{{ data.premisesAddressCounty }}{% endif %}
+                            <br>{{ data.premisesAddressPostcode }}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/license-details">Change<span class="govuk-visually-hidden"> premises address</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Licensed activities</dt>
+                        <dd class="govuk-summary-list__value">
+                            {% if data.activities %}
+                                {% for activity in data.activities %}
+                                    {% if activity == 'sale-on' %}Sale of alcohol for consumption on the premises
+                                    {% elif activity == 'sale-off' %}Sale of alcohol for consumption off the premises
+                                    {% elif activity == 'regulated-entertainment' %}Provision of regulated entertainment
+                                    {% elif activity == 'late-night-refreshment' %}Provision of late night refreshment
+                                    {% endif %}{% if not loop.last %}<br>{% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/license-details">Change<span class="govuk-visually-hidden"> licensed activities</span></a>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Operating hours</dt>
+                        <dd class="govuk-summary-list__value">
+                            {% if data.mondayHours %}Monday: {{ data.mondayHours }}<br>{% endif %}
+                            {% if data.tuesdayHours %}Tuesday: {{ data.tuesdayHours }}<br>{% endif %}
+                            {% if data.wednesdayHours %}Wednesday: {{ data.wednesdayHours }}<br>{% endif %}
+                            {% if data.thursdayHours %}Thursday: {{ data.thursdayHours }}<br>{% endif %}
+                            {% if data.fridayHours %}Friday: {{ data.fridayHours }}<br>{% endif %}
+                            {% if data.saturdayHours %}Saturday: {{ data.saturdayHours }}<br>{% endif %}
+                            {% if data.sundayHours %}Sunday: {{ data.sundayHours }}{% endif %}
+                        </dd>
+                        <dd class="govuk-summary-list__actions">
+                            <a class="govuk-link" href="/license-details">Change<span class="govuk-visually-hidden"> operating hours</span></a>
+                        </dd>
+                    </div>
+                </dl>
+                <form method="post">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <h2 class="govuk-heading-m">Declaration</h2>
+                    {% set declarationError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'declaration' %}
+                            {% set declarationError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if declarationError %} govuk-form-group--error{% endif %}">
+                        <fieldset class="govuk-fieldset" aria-describedby="declaration-hint">
+                            <div id="declaration-hint" class="govuk-hint">
+                                By submitting this application, you confirm that the information you have provided is correct and complete.
+                            </div>
+                            {% if declarationError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ declarationError.msg }}</span>
+                            {% endif %}
+                            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                                <div class="govuk-checkboxes__item">
+                                    <input class="govuk-checkboxes__input" id="declaration" name="declaration" type="checkbox" value="yes">
+                                    <label class="govuk-label govuk-checkboxes__label" for="declaration">
+                                        I confirm that the information I have provided is correct and I understand that providing false information may result in my application being refused.
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="govuk-button-group">
+                        <button class="govuk-button" data-module="govuk-button">Submit application</button>
+                        <a class="govuk-link" href="/license-details">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "layout.njk" %}
+
+{% block title %}Error {{ statusCode }} - GOV.UK{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        {% if statusCode == 404 %}
+            <h1 class="govuk-heading-xl">Page not found</h1>
+            <p class="govuk-body">The page you were looking for could not be found.</p>
+            <p class="govuk-body">This could be because:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>the web address is incorrect</li>
+                <li>the page has been moved or deleted</li>
+                <li>there's a temporary technical problem</li>
+            </ul>
+        {% elif statusCode == 429 %}
+            <h1 class="govuk-heading-xl">Too many requests</h1>
+            <p class="govuk-body">You have made too many requests. Please wait a few minutes before trying again.</p>
+        {% else %}
+            <h1 class="govuk-heading-xl">Something went wrong</h1>
+            <p class="govuk-body">{{ message }}</p>
+            <p class="govuk-body">Try refreshing the page or going back to the <a href="/" class="govuk-link">start of the service</a>.</p>
+        {% endif %}
+
+        {% if showDetails %}
+            <details class="govuk-details" data-module="govuk-details">
+                <summary class="govuk-details__summary">
+                    <span class="govuk-details__summary-text">
+                        Technical details
+                    </span>
+                </summary>
+                <div class="govuk-details__text">
+                    <p class="govuk-body">Error {{ statusCode }}: {{ message }}</p>
+                </div>
+            </details>
+        {% endif %}
+
+        <p class="govuk-body">
+            <a href="/" class="govuk-link">Go back to the start</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

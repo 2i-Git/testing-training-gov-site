@@ -1,0 +1,193 @@
+{% extends "layout.njk" %}
+{% block content %}
+<div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">
+            <strong class="govuk-tag govuk-phase-banner__content__tag">Training</strong>
+            <span class="govuk-phase-banner__text">This is a training application for testing purposes only.</span>
+        </p>
+    </div>
+    <div class="govuk-breadcrumbs">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Start</a></li>
+            <li class="govuk-breadcrumbs__list-item">Personal details</li>
+        </ol>
+    </div>
+    {% if errors and errors.length %}
+    <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+        <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                    {% set fieldId = error.path %}
+                    {% if error.path == 'firstName' %}{% set fieldId = 'first-name' %}{% endif %}
+                    {% if error.path == 'lastName' %}{% set fieldId = 'last-name' %}{% endif %}
+                    {% if error.path == 'dobDay' %}{% set fieldId = 'dob-day' %}{% endif %}
+                    {% if error.path == 'dobMonth' %}{% set fieldId = 'dob-month' %}{% endif %}
+                    {% if error.path == 'dobYear' %}{% set fieldId = 'dob-year' %}{% endif %}
+                    {% if error.path == 'email' %}{% set fieldId = 'email' %}{% endif %}
+                    {% if error.path == 'phoneNumber' %}{% set fieldId = 'phone' %}{% endif %}
+                    {% if error.path == 'addressLine1' %}{% set fieldId = 'address-line-1' %}{% endif %}
+                    {% if error.path == 'addressTown' %}{% set fieldId = 'address-town' %}{% endif %}
+                    {% if error.path == 'addressPostcode' %}{% set fieldId = 'address-postcode' %}{% endif %}
+                <li><a href="#{{ fieldId }}">{{ error.msg }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <span class="govuk-caption-xl">Step 1 of 4</span>
+                <h1 class="govuk-heading-xl">Personal details</h1>
+                <p class="govuk-body">We need your personal details as you'll be responsible for the licence.</p>
+                <form id="personal-details-form" method="post">
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    {% set firstNameError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'firstName' %}
+                            {% set firstNameError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if firstNameError %} govuk-form-group--error{% endif %}">
+                        <label class="govuk-label" for="first-name">First name</label>
+                        {% if firstNameError %}
+                        <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ firstNameError.msg }}</span>
+                        {% endif %}
+                        <input class="govuk-input{% if firstNameError %} govuk-input--error{% endif %}" id="first-name" name="firstName" type="text" spellcheck="false" autocomplete="given-name" value="{{ data.firstName | default('') }}">
+                    </div>
+                    {% set lastNameError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'lastName' %}
+                            {% set lastNameError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if lastNameError %} govuk-form-group--error{% endif %}">
+                        <label class="govuk-label" for="last-name">Last name</label>
+                        {% if lastNameError %}
+                        <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ lastNameError.msg }}</span>
+                        {% endif %}
+                        <input class="govuk-input{% if lastNameError %} govuk-input--error{% endif %}" id="last-name" name="lastName" type="text" spellcheck="false" autocomplete="family-name" value="{{ data.lastName | default('') }}">
+                    </div>
+                    {% set dobError = null %}
+                    {% for error in errors %}
+                        {% if error.path in ['dobDay', 'dobMonth', 'dobYear'] %}
+                            {% set dobError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if dobError %} govuk-form-group--error{% endif %}">
+                        <fieldset class="govuk-fieldset" role="group" aria-describedby="date-of-birth-hint">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Date of birth</legend>
+                            <div id="date-of-birth-hint" class="govuk-hint">For example, 31 3 1980</div>
+                            {% if dobError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ dobError.msg }}</span>
+                            {% endif %}
+                            <div class="govuk-date-input" id="date-of-birth">
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="dob-day">Day</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2{% if dobError %} govuk-input--error{% endif %}" id="dob-day" name="dobDay" type="text" inputmode="numeric" value="{{ data.dobDay | default('') }}">
+                                    </div>
+                                </div>
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="dob-month">Month</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2{% if dobError %} govuk-input--error{% endif %}" id="dob-month" name="dobMonth" type="text" inputmode="numeric" value="{{ data.dobMonth | default('') }}">
+                                    </div>
+                                </div>
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="dob-year">Year</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-4{% if dobError %} govuk-input--error{% endif %}" id="dob-year" name="dobYear" type="text" inputmode="numeric" value="{{ data.dobYear | default('') }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    {% set emailError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'email' %}
+                            {% set emailError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if emailError %} govuk-form-group--error{% endif %}">
+                        <label class="govuk-label" for="email">Email address</label>
+                        <div id="email-hint" class="govuk-hint">We'll use this to send you updates about your application</div>
+                        {% if emailError %}
+                        <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ emailError.msg }}</span>
+                        {% endif %}
+                        <input class="govuk-input{% if emailError %} govuk-input--error{% endif %}" id="email" name="email" type="email" spellcheck="false" aria-describedby="email-hint" autocomplete="email" value="{{ data.email | default('') }}">
+                    </div>
+                    {% set phoneError = null %}
+                    {% for error in errors %}
+                        {% if error.path == 'phoneNumber' %}
+                            {% set phoneError = error %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="govuk-form-group{% if phoneError %} govuk-form-group--error{% endif %}">
+                        <label class="govuk-label" for="phone">Phone number</label>
+                        <div id="phone-hint" class="govuk-hint">UK phone numbers only</div>
+                        {% if phoneError %}
+                        <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ phoneError.msg }}</span>
+                        {% endif %}
+                        <input class="govuk-input govuk-input--width-20{% if phoneError %} govuk-input--error{% endif %}" id="phone" name="phoneNumber" type="tel" aria-describedby="phone-hint" autocomplete="tel" value="{{ data.phoneNumber | default('') }}">
+                    </div>
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Address</legend>
+                        {% set addressLine1Error = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'addressLine1' %}
+                                {% set addressLine1Error = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if addressLine1Error %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="address-line-1">Address line 1</label>
+                            {% if addressLine1Error %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ addressLine1Error.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input{% if addressLine1Error %} govuk-input--error{% endif %}" id="address-line-1" name="addressLine1" type="text" autocomplete="address-line1" value="{{ data.addressLine1 | default('') }}">
+                        </div>
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="address-line-2">Address line 2 (optional)</label>
+                            <input class="govuk-input" id="address-line-2" name="addressLine2" type="text" autocomplete="address-line2" value="{{ data.addressLine2 | default('') }}">
+                        </div>
+                        {% set addressTownError = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'addressTown' %}
+                                {% set addressTownError = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if addressTownError %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="address-town">Town or city</label>
+                            {% if addressTownError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ addressTownError.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input govuk-input--width-20{% if addressTownError %} govuk-input--error{% endif %}" id="address-town" name="addressTown" type="text" autocomplete="address-level2" value="{{ data.addressTown | default('') }}">
+                        </div>
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="address-county">County (optional)</label>
+                            <input class="govuk-input govuk-input--width-20" id="address-county" name="addressCounty" type="text" value="{{ data.addressCounty | default('') }}">
+                        </div>
+                        {% set addressPostcodeError = null %}
+                        {% for error in errors %}
+                            {% if error.path == 'addressPostcode' %}
+                                {% set addressPostcodeError = error %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="govuk-form-group{% if addressPostcodeError %} govuk-form-group--error{% endif %}">
+                            <label class="govuk-label" for="address-postcode">Postcode</label>
+                            {% if addressPostcodeError %}
+                            <span class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ addressPostcodeError.msg }}</span>
+                            {% endif %}
+                            <input class="govuk-input govuk-input--width-10{% if addressPostcodeError %} govuk-input--error{% endif %}" id="address-postcode" name="addressPostcode" type="text" autocomplete="postal-code" value="{{ data.addressPostcode | default('') }}">
+                        </div>
+                    </fieldset>
+                    <button class="govuk-button" data-module="govuk-button">Continue</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+{% endblock %}
