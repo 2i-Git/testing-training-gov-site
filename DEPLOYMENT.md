@@ -1,6 +1,7 @@
 # Production Deployment Checklist
 
 ## Environment Setup
+
 - [ ] Set NODE_ENV=production
 - [ ] Configure SESSION_SECRET with strong random value
 - [ ] Set up HTTPS/TLS certificates
@@ -9,6 +10,7 @@
 - [ ] Configure log rotation
 
 ## Security Hardening
+
 - [ ] Enable HTTPS (set session.cookie.secure=true)
 - [ ] Configure firewall rules
 - [ ] Set up DDoS protection
@@ -17,6 +19,7 @@
 - [ ] Vulnerability scanning
 
 ## Performance Optimization
+
 - [ ] Database optimization and indexing
 - [ ] Enable gzip compression
 - [ ] Set up CDN for static assets
@@ -25,6 +28,7 @@
 - [ ] Health checks and monitoring
 
 ## Monitoring & Logging
+
 - [ ] Set up application monitoring (PM2, New Relic, etc.)
 - [ ] Configure log aggregation (ELK stack, Splunk, etc.)
 - [ ] Set up alerting for errors and performance issues
@@ -32,12 +36,14 @@
 - [ ] Uptime monitoring
 
 ## Backup & Recovery
+
 - [ ] Automated database backups
 - [ ] Backup testing and restoration procedures
 - [ ] Disaster recovery plan
 - [ ] Data retention policies
 
 ## Compliance & Legal
+
 - [ ] GDPR compliance review
 - [ ] Data protection impact assessment
 - [ ] Terms of service and privacy policy

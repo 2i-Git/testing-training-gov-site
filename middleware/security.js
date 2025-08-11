@@ -1,12 +1,12 @@
 /**
  * Security Middleware
- * 
+ *
  * Provides comprehensive security middleware for the application including:
  * - Rate limiting to prevent abuse and DoS attacks
  * - Input sanitization to prevent XSS attacks
  * - Security headers via Helmet.js
  * - CSRF protection for forms
- * 
+ *
  * Security Layers:
  * 1. Rate Limiting - Prevents brute force and abuse
  * 2. Input Sanitization - Cleans user input to prevent XSS
@@ -21,10 +21,10 @@ const config = require('../config/config');
 
 /**
  * Create a rate limiter with custom configuration
- * 
+ *
  * Rate limiting helps prevent abuse by limiting the number of requests
  * a client can make within a specified time window.
- * 
+ *
  * @param {number} windowMs - Time window in milliseconds
  * @param {number} max - Maximum number of requests per window
  * @param {string} message - Custom message for rate limit exceeded
@@ -32,15 +32,15 @@ const config = require('../config/config');
  */
 const createRateLimiter = (windowMs, max, message) => {
   return rateLimit({
-    windowMs,                    // Time window for rate limiting
-    max,                        // Maximum requests per window
-    message: { 
-      success: false, 
-      error: 'Too many requests', 
-      message 
+    windowMs, // Time window for rate limiting
+    max, // Maximum requests per window
+    message: {
+      success: false,
+      error: 'Too many requests',
+      message
     },
-    standardHeaders: true,      // Include rate limit info in standard headers
-    legacyHeaders: false,       // Don't include legacy rate limit headers
+    standardHeaders: true, // Include rate limit info in standard headers
+    legacyHeaders: false, // Don't include legacy rate limit headers
     // Skip rate limiting in test environment to avoid interference with tests
     skip: () => config.NODE_ENV === 'test'
   });
@@ -48,10 +48,10 @@ const createRateLimiter = (windowMs, max, message) => {
 
 /**
  * Input sanitization middleware
- * 
+ *
  * Recursively sanitizes all string inputs in request body, query, and params
  * to prevent XSS attacks by escaping HTML characters.
- * 
+ *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
@@ -59,10 +59,10 @@ const createRateLimiter = (windowMs, max, message) => {
 const sanitizeInput = (req, res, next) => {
   /**
    * Recursively sanitize an object's string properties
-   * 
+   *
    * @param {Object} obj - Object to sanitize
    */
-  const sanitizeObject = (obj) => {
+  const sanitizeObject = obj => {
     Object.keys(obj).forEach(key => {
       if (typeof obj[key] === 'string') {
         // Escape HTML characters and trim whitespace
@@ -78,13 +78,13 @@ const sanitizeInput = (req, res, next) => {
   if (req.body) sanitizeObject(req.body);
   if (req.query) sanitizeObject(req.query);
   if (req.params) sanitizeObject(req.params);
-  
+
   next();
 };
 
 /**
  * Security headers middleware using Helmet.js
- * 
+ *
  * Adds various security headers to protect against common attacks:
  * - Content Security Policy (CSP) to prevent XSS
  * - X-Frame-Options to prevent clickjacking
@@ -94,11 +94,11 @@ const sanitizeInput = (req, res, next) => {
 const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],                                    // Default to same-origin only
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Allow inline styles for GOV.UK
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],         // Allow Google Fonts
-      scriptSrc: ["'self'", "'unsafe-inline'"],                 // Allow inline scripts (required for GOV.UK Frontend)
-      imgSrc: ["'self'", "data:", "https:"],
+      defaultSrc: ["'self'"], // Default to same-origin only
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'], // Allow inline styles for GOV.UK
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'], // Allow Google Fonts
+      scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts (required for GOV.UK Frontend)
+      imgSrc: ["'self'", 'data:', 'https:'],
       connectSrc: ["'self'"]
     }
   },
@@ -122,7 +122,7 @@ const csrfProtection = (req, res, next) => {
   // Validate CSRF token for POST requests
   if (req.method === 'POST' && !req.path.startsWith('/api/')) {
     const clientToken = req.body._csrf || req.headers['x-csrf-token'];
-    
+
     if (!clientToken || clientToken !== req.session.csrfToken) {
       // Render the correct form with CSRF error
       let formName;
@@ -136,7 +136,7 @@ const csrfProtection = (req, res, next) => {
         // For admin status updates, redirect back to applications with error
         return res.status(403).redirect('/admin/applications?error=Invalid CSRF token');
       }
-      
+
       if (formName) {
         return res.status(403).render(formName, {
           errors: [{ msg: 'Invalid CSRF token', path: '_csrf' }],
@@ -155,7 +155,7 @@ const csrfProtection = (req, res, next) => {
 // Request logging middleware
 const requestLogger = (req, res, next) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - start;
     const logData = {
@@ -167,10 +167,12 @@ const requestLogger = (req, res, next) => {
       userAgent: req.get('User-Agent'),
       timestamp: new Date().toISOString()
     };
-    
-    console.log(`${logData.method} ${logData.url} ${logData.status} ${logData.duration} - ${logData.ip}`);
+
+    console.log(
+      `${logData.method} ${logData.url} ${logData.status} ${logData.duration} - ${logData.ip}`
+    );
   });
-  
+
   next();
 };
 
@@ -178,7 +180,7 @@ module.exports = {
   // Rate limiters for different endpoints
   rateLimiters: {
     general: createRateLimiter(
-      config.security.rateLimitWindowMs, 
+      config.security.rateLimitWindowMs,
       config.security.rateLimitMax,
       'Too many requests from this IP, please try again later'
     ),
@@ -193,7 +195,7 @@ module.exports = {
       'API rate limit exceeded'
     )
   },
-  
+
   securityHeaders,
   sanitizeInput,
   csrfProtection,

@@ -11,6 +11,7 @@ A comprehensive **training application** that simulates a government alcohol lic
 ## 🎯 Purpose
 
 This application serves as a **realistic testing environment** for:
+
 - **Manual Testers**: Practice testing web applications with real-world complexity
 - **Test Automation**: Stable endpoints and elements for automation practice
 - **API Testing**: Complete REST API with proper error handling
@@ -20,8 +21,9 @@ This application serves as a **realistic testing environment** for:
 ## ✨ Features
 
 ### 🎨 Frontend (User Interface)
+
 - **GOV.UK Design System**: Authentic government styling and components
-- **Multi-step Form Journey**: 
+- **Multi-step Form Journey**:
   - Personal details collection
   - Business information capture
   - License requirements selection
@@ -33,6 +35,7 @@ This application serves as a **realistic testing environment** for:
 - **Session Management**: Maintains user state throughout the application journey
 
 ### 👩‍💼 Admin Panel
+
 - **Secure Authentication**: Admin login with session management
 - **Application Dashboard**: View all submitted applications
 - **Status Management**: Approve, reject, or update application status
@@ -40,6 +43,7 @@ This application serves as a **realistic testing environment** for:
 - **CSRF Protection**: Secure form submissions
 
 ### 🔌 Backend API
+
 - **RESTful API**: Complete CRUD operations following REST principles
 - **Data Validation**: Comprehensive input validation using custom middleware
 - **Error Handling**: Proper HTTP status codes and structured error responses
@@ -48,6 +52,7 @@ This application serves as a **realistic testing environment** for:
 - **Logging**: Comprehensive request and error logging with Winston
 
 ### 🗄️ Database
+
 - **SQLite Database**: Lightweight, file-based database perfect for testing
 - **Structured Schema**: Proper normalization and data types
 - **CRUD Operations**: Full Create, Read, Update, Delete functionality
@@ -55,6 +60,7 @@ This application serves as a **realistic testing environment** for:
 - **Migration Support**: Database initialization and updates
 
 ### 🔒 Security Features
+
 - **CSRF Protection**: Cross-Site Request Forgery prevention
 - **Input Sanitization**: XSS prevention and data cleaning
 - **Rate Limiting**: API abuse prevention
@@ -64,6 +70,7 @@ This application serves as a **realistic testing environment** for:
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - **Node.js** (v18 or higher)
 - **npm** (v8 or higher)
 - **Docker** (optional, for containerized deployment)
@@ -101,9 +108,11 @@ docker compose up -d
 ## 📚 API Documentation
 
 ### Health Check
+
 - **GET** `/api/health` - Check API and database health status
 
 ### Applications
+
 - **GET** `/api/applications` - Retrieve all applications (with pagination)
 - **GET** `/api/applications/:id` - Get specific application by ID
 - **POST** `/api/applications` - Create new application
@@ -111,6 +120,7 @@ docker compose up -d
 - **DELETE** `/api/applications/:id` - Delete application
 
 ### Admin Panel
+
 - **GET** `/admin/login` - Admin login page
 - **POST** `/admin/login` - Admin authentication
 - **GET** `/admin/dashboard` - Admin dashboard
@@ -119,6 +129,7 @@ docker compose up -d
 ## 🏗️ Architecture
 
 ### Project Structure
+
 ```
 testing-training-gov-site/
 ├── 📁 config/                 # Configuration management
@@ -159,6 +170,7 @@ testing-training-gov-site/
 ### Technology Stack
 
 #### Backend
+
 - **Node.js** (v18+) - JavaScript runtime
 - **Express.js** (v4+) - Web application framework
 - **SQLite** (v3) - Embedded database
@@ -166,12 +178,14 @@ testing-training-gov-site/
 - **Winston** - Logging framework
 
 #### Frontend
+
 - **GOV.UK Design System** - UI components and styling
 - **Nunjucks** - Server-side template rendering
 - **Vanilla JavaScript** - Client-side functionality
 - **Responsive CSS** - Mobile-first design
 
 #### Security & Middleware
+
 - **express-session** - Session management
 - **csurf** - CSRF protection
 - **express-rate-limit** - Rate limiting
@@ -179,6 +193,7 @@ testing-training-gov-site/
 - **express-validator** - Input validation
 
 #### Development & Deployment
+
 - **Docker** - Containerization
 - **Docker Compose** - Multi-container orchestration
 - **Jest** - Testing framework
@@ -224,15 +239,18 @@ ALLOWED_FILE_TYPES=pdf,jpg,png
 ### Configuration Categories
 
 #### Security Settings
+
 - **SESSION_SECRET**: Cryptographic key for session encryption (REQUIRED in production)
-- **RATE_LIMIT_***: API rate limiting configuration
+- **RATE*LIMIT*\***: API rate limiting configuration
 - **CORS_ORIGIN**: Allowed cross-origin request sources
 
 #### Database Settings
+
 - **DB_PATH**: SQLite database file location
 - **DB_CONNECTION_LIMIT**: Maximum concurrent database connections
 
 #### Application Settings
+
 - **PORT**: HTTP server port
 - **NODE_ENV**: Environment mode (development/production)
 - **LOG_LEVEL**: Minimum logging level (error/warn/info/debug)
@@ -292,6 +310,7 @@ npm run lint:fix       # Fix code style issues
 ### Code Style and Standards
 
 This project follows these coding standards:
+
 - **ESLint** configuration for JavaScript linting
 - **Prettier** for code formatting
 - **JSDoc** comments for function documentation
@@ -300,6 +319,7 @@ This project follows these coding standards:
 ### Testing Strategy
 
 The application includes comprehensive testing:
+
 - **Unit Tests**: Individual function and component testing
 - **Integration Tests**: API endpoint testing
 - **Database Tests**: Data persistence and retrieval
@@ -312,6 +332,7 @@ This application is designed to provide realistic testing scenarios for manual a
 ### User Journey Testing
 
 #### Happy Path
+
 1. Navigate to application start page
 2. Complete personal details form
 3. Fill in business information
@@ -321,6 +342,7 @@ This application is designed to provide realistic testing scenarios for manual a
 7. Receive confirmation with reference number
 
 #### Error Scenarios
+
 - **Validation Errors**: Missing required fields, invalid formats
 - **Session Timeout**: Long form completion times
 - **Network Issues**: Simulated API failures
@@ -329,12 +351,14 @@ This application is designed to provide realistic testing scenarios for manual a
 ### API Testing Scenarios
 
 #### Success Cases
+
 - GET requests with valid parameters
 - POST requests with complete data
 - PATCH requests for status updates
 - Proper HTTP status codes
 
 #### Error Cases
+
 - Invalid request formats (400 Bad Request)
 - Missing authentication (401 Unauthorized)
 - Resource not found (404 Not Found)
@@ -344,12 +368,14 @@ This application is designed to provide realistic testing scenarios for manual a
 ### Admin Panel Testing
 
 #### Authentication Testing
+
 - Valid login credentials
 - Invalid credentials handling
 - Session management
 - CSRF protection
 
 #### Application Management
+
 - View application lists
 - Filter by status
 - Update application status
@@ -358,12 +384,14 @@ This application is designed to provide realistic testing scenarios for manual a
 ### Database Testing
 
 #### Data Integrity
+
 - Application creation and storage
 - Status updates
 - Data retrieval accuracy
 - Concurrent access handling
 
 #### Performance Testing
+
 - Large dataset handling
 - Query optimization
 - Connection pooling
@@ -372,17 +400,20 @@ This application is designed to provide realistic testing scenarios for manual a
 ## 🔒 Security Features
 
 ### Authentication & Authorization
+
 - **Session-based authentication** for admin users
 - **Secure session configuration** with HTTP-only cookies
 - **Session timeout** for inactive users
 
 ### Input Security
+
 - **CSRF protection** on all forms
 - **Input sanitization** to prevent XSS attacks
 - **SQL injection prevention** through parameterized queries
 - **Rate limiting** to prevent brute force attacks
 
 ### Data Protection
+
 - **Sensitive data masking** in logs
 - **Secure headers** via Helmet.js
 - **Environment variable protection** for secrets
@@ -391,18 +422,21 @@ This application is designed to provide realistic testing scenarios for manual a
 ## 📊 Monitoring & Logging
 
 ### Application Logging
+
 - **Structured logging** with Winston
 - **Request/response logging** for debugging
 - **Error logging** with stack traces
 - **Performance metrics** tracking
 
 ### Health Monitoring
+
 - **Health check endpoint** (`/api/health`)
 - **Database connectivity** verification
 - **Service dependency** checking
 - **Uptime monitoring** capability
 
 ### Log Levels
+
 - **ERROR**: Critical errors requiring immediate attention
 - **WARN**: Warning conditions that should be monitored
 - **INFO**: General information about application flow
@@ -411,6 +445,7 @@ This application is designed to provide realistic testing scenarios for manual a
 ## 🐳 Docker Deployment
 
 ### Container Features
+
 - **Multi-stage build** for optimized image size
 - **Non-root user** for security
 - **Health checks** for container monitoring
@@ -418,7 +453,9 @@ This application is designed to provide realistic testing scenarios for manual a
 - **Environment configuration** support
 
 ### Docker Compose
+
 The application includes a complete Docker Compose setup:
+
 - **Application container** with auto-restart
 - **Volume mounts** for data persistence
 - **Environment variable** configuration
@@ -507,6 +544,7 @@ curl -X PATCH http://localhost:3000/api/applications/{applicationId}/status \
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/new-feature`)
 3. Make your changes
@@ -517,6 +555,7 @@ curl -X PATCH http://localhost:3000/api/applications/{applicationId}/status \
 8. Create a Pull Request
 
 ### Code Guidelines
+
 - Follow existing code style and patterns
 - Add JSDoc comments for new functions
 - Include tests for new features
@@ -528,6 +567,7 @@ curl -X PATCH http://localhost:3000/api/applications/{applicationId}/status \
 ### Common Issues
 
 #### Database Connection Errors
+
 ```bash
 # Check database file permissions
 ls -la database/
@@ -539,6 +579,7 @@ npm run init-db
 ```
 
 #### Session/CSRF Errors
+
 ```bash
 # Clear browser cookies and session data
 # Check SESSION_SECRET in .env file
@@ -547,6 +588,7 @@ npm run dev
 ```
 
 #### Docker Issues
+
 ```bash
 # Check Docker is running
 docker --version
@@ -560,6 +602,7 @@ docker compose up -d
 ```
 
 #### Port Already in Use
+
 ```bash
 # Find process using port 3000
 sudo lsof -i :3000
@@ -572,6 +615,7 @@ PORT=3001 npm start
 ```
 
 ### Getting Help
+
 - Check the application logs in `./logs/app.log`
 - Review the health check endpoint: `http://localhost:3000/api/health`
 - Ensure all environment variables are properly set
@@ -591,6 +635,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built for testing training and educational purposes.** This application simulates real-world government services for the purpose of teaching software testing skills and practices.
+
 - `GET /api/applications` - Get all applications
 - `GET /api/applications/:id` - Get specific application by ID
 - `POST /api/applications` - Create new application
@@ -600,22 +645,26 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd testing-training-gov-site
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Start the application**
+
    ```bash
    npm start
    ```
 
 4. **For development (with auto-restart)**
+
    ```bash
    npm run dev
    ```
@@ -628,6 +677,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Usage
 
 ### Application Flow
+
 1. Visit `http://localhost:3000`
 2. Click "Start now" to begin the application
 3. Complete each step:
@@ -637,21 +687,25 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
    - Review and submit
 
 ### API Testing
+
 Use tools like Postman, curl, or the built-in test suite to test API endpoints.
 
 **Example API calls:**
 
 **Health Check:**
+
 ```bash
 curl http://localhost:3000/api/health
 ```
 
 **Get All Applications:**
+
 ```bash
 curl http://localhost:3000/api/applications
 ```
 
 **Create Application:**
+
 ```bash
 curl -X POST http://localhost:3000/api/applications \
   -H "Content-Type: application/json" \
@@ -697,11 +751,13 @@ curl -X POST http://localhost:3000/api/applications \
 ## Testing
 
 Run the test suite:
+
 ```bash
 npm test
 ```
 
 The tests cover:
+
 - API endpoint functionality
 - Data validation
 - Error handling
@@ -711,6 +767,7 @@ The tests cover:
 ## Training Scenarios
 
 ### For Testers
+
 1. **Happy Path Testing**: Complete a full application successfully
 2. **Validation Testing**: Try submitting incomplete or invalid data
 3. **API Testing**: Use the API endpoints to create, read, update, and delete applications
@@ -718,9 +775,11 @@ The tests cover:
 5. **Error Handling**: Test various error scenarios
 
 ### Test Data Examples
+
 Use these data sets for consistent testing:
 
 **Valid Application:**
+
 - Name: John Smith
 - DOB: 15/03/1985
 - Email: john.smith@example.com
@@ -729,6 +788,7 @@ Use these data sets for consistent testing:
 - License Type: Premises licence
 
 **Invalid Data Tests:**
+
 - Missing required fields
 - Invalid email formats
 - Invalid date formats
@@ -758,6 +818,7 @@ testing-training-gov-site/
 ## Technical Details
 
 ### Technologies Used
+
 - **Node.js**: Server runtime
 - **Express.js**: Web framework
 - **SQLite3**: Database
@@ -767,13 +828,16 @@ testing-training-gov-site/
 - **Supertest**: API testing
 
 ### Data Structure
+
 Applications are stored with the following structure:
+
 - Personal Details (name, DOB, contact info, address)
 - Business Details (business info, type, contact details)
 - License Details (type, premises, activities, operating hours)
 - Metadata (application ID, status, timestamps)
 
 ### Status Values
+
 - `submitted`: Initial status when application is created
 - `under-review`: Application is being processed
 - `approved`: Application has been approved
@@ -784,21 +848,26 @@ Applications are stored with the following structure:
 ### Common Issues
 
 **Port already in use:**
+
 - Change the port in `server.js` or set the `PORT` environment variable
 
 **Database errors:**
+
 - Delete `database/alcohol_license.db` and restart the server to recreate
 
 **Missing dependencies:**
+
 - Run `npm install` to install all required packages
 
 **Form not submitting:**
+
 - Check browser console for JavaScript errors
 - Ensure all required fields are completed
 
 ## Contributing
 
 This is a training application. Feel free to:
+
 - Add more validation rules
 - Create additional test scenarios
 - Enhance the UI/UX

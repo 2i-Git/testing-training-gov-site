@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { personalDetailsValidation, businessDetailsValidation, licenseDetailsValidation, declarationValidation } = require('../middleware/validation');
+const {
+  personalDetailsValidation,
+  businessDetailsValidation,
+  licenseDetailsValidation,
+  declarationValidation
+} = require('../middleware/validation');
 const { asyncHandler } = require('../middleware/errorHandler');
 // Use the initialized applicationService from server.js
 let applicationService;
@@ -9,14 +14,12 @@ const { logger, logApplicationEvent } = require('../utils/logger');
 
 // applicationService will be injected by server.js
 // Export a function to inject dependencies
-module.exports = (deps) => {
+module.exports = deps => {
   applicationService = deps.applicationService;
   return router;
 };
 
-const users = [
-  { email: 'user@example.com', password: 'password123' }
-];
+const users = [{ email: 'user@example.com', password: 'password123' }];
 
 function requireAuth(req, res, next) {
   if (req.session && req.session.user) {
@@ -51,14 +54,16 @@ router.get('/', (req, res) => {
 });
 
 router.get('/personal-details', requireAuth, (req, res) => {
-  res.render('personal-details', { 
-    errors: [], 
+  res.render('personal-details', {
+    errors: [],
     data: req.session.data || {},
     csrfToken: res.locals.csrfToken
   });
 });
 
-router.post('/personal-details', requireAuth,
+router.post(
+  '/personal-details',
+  requireAuth,
   rateLimiters.forms,
   personalDetailsValidation,
   asyncHandler(async (req, res) => {
@@ -80,14 +85,16 @@ router.post('/personal-details', requireAuth,
 );
 
 router.get('/business-details', requireAuth, (req, res) => {
-  res.render('business-details', { 
-    errors: [], 
+  res.render('business-details', {
+    errors: [],
     data: req.session.data || {},
     csrfToken: res.locals.csrfToken
   });
 });
 
-router.post('/business-details', requireAuth,
+router.post(
+  '/business-details',
+  requireAuth,
   rateLimiters.forms,
   businessDetailsValidation,
   asyncHandler(async (req, res) => {
@@ -105,14 +112,16 @@ router.post('/business-details', requireAuth,
 );
 
 router.get('/license-details', requireAuth, (req, res) => {
-  res.render('license-details', { 
-    errors: [], 
+  res.render('license-details', {
+    errors: [],
     data: req.session.data || {},
     csrfToken: res.locals.csrfToken
   });
 });
 
-router.post('/license-details', requireAuth,
+router.post(
+  '/license-details',
+  requireAuth,
   rateLimiters.forms,
   licenseDetailsValidation,
   asyncHandler(async (req, res) => {
@@ -142,7 +151,7 @@ router.get('/summary', requireAuth, (req, res) => {
     activitiesType: typeof req.session.data?.activities,
     sessionId: req.sessionID
   });
-  
+
   res.render('summary', {
     data: req.session.data || {},
     errors: [],
@@ -150,7 +159,9 @@ router.get('/summary', requireAuth, (req, res) => {
   });
 });
 
-router.post('/summary', requireAuth,
+router.post(
+  '/summary',
+  requireAuth,
   rateLimiters.forms,
   declarationValidation,
   asyncHandler(async (req, res) => {
@@ -178,13 +189,13 @@ router.post('/summary', requireAuth,
       });
       res.redirect('/confirmation');
     } catch (error) {
-      logger.error('Application submission failed', { 
+      logger.error('Application submission failed', {
         error: error.message,
         stack: error.stack,
         sessionData: req.session.data,
         declaration: req.body.declaration,
         sessionId: req.sessionID,
-        ip: req.ip 
+        ip: req.ip
       });
       return res.status(500).render('summary', {
         errors: [{ msg: 'An error occurred while submitting your application. Please try again.' }],

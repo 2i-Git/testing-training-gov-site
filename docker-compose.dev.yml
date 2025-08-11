@@ -8,8 +8,8 @@ services:
       target: development
     container_name: alcohol-license-training-dev
     ports:
-      - "3000:3000"
-      - "9229:9229"  # Debug port
+      - '3000:3000'
+      - '9229:9229' # Debug port
     environment:
       - NODE_ENV=development
       - PORT=3000
@@ -22,7 +22,7 @@ services:
       # Persist database and logs
       - ./database:/app/database
       - ./logs:/app/logs
-    command: ["npm", "run", "dev"]
+    command: ['npm', 'run', 'dev']
     restart: unless-stopped
 
 networks:

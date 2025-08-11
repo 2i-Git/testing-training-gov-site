@@ -1,17 +1,17 @@
 /**
  * Application Service
- * 
+ *
  * This service handles all business logic for alcohol license training applications.
  * It acts as an abstraction layer between the route handlers and the database,
  * providing validation, data sanitization, and error handling.
- * 
+ *
  * Key Responsibilities:
  * - Application CRUD operations (Create, Read, Update, Delete)
  * - Data validation and sanitization
  * - Business logic enforcement
  * - Error handling and logging
  * - Status management (submitted, approved, rejected)
- * 
+ *
  * Design Pattern: Service Layer Pattern
  * - Encapsulates business logic
  * - Provides a clean API for route handlers
@@ -26,7 +26,7 @@ const { logger } = require('../utils/logger');
 
 /**
  * ApplicationService class
- * 
+ *
  * Manages all application-related operations including creation, retrieval,
  * updating, and deletion of alcohol license training applications.
  */
@@ -37,10 +37,10 @@ class ApplicationService {
 
   /**
    * Initialize the service
-   * 
+   *
    * Establishes database connection and ensures the service is ready to handle requests.
    * This must be called before any other service methods.
-   * 
+   *
    * @throws {AppError} If initialization fails
    */
   async initialize() {
@@ -55,16 +55,16 @@ class ApplicationService {
 
   /**
    * Create a new application
-   * 
+   *
    * Validates the application data, generates a unique ID, sanitizes input,
    * and saves the application to the database with 'submitted' status.
-   * 
+   *
    * @param {Object} applicationData - The application data from the user form
    * @param {Object} applicationData.personalDetails - Personal information
    * @param {Object} applicationData.businessDetails - Business information
    * @param {Object} applicationData.licenseDetails - License requirements
    * @param {boolean} applicationData.declaration - Declaration acceptance
-   * 
+   *
    * @returns {Object} Created application summary with ID, status, and timestamp
    * @throws {ValidationError} If application data is invalid
    * @throws {DatabaseError} If database operation fails
@@ -76,9 +76,9 @@ class ApplicationService {
       try {
         this.validateApplicationData(applicationData);
       } catch (validationError) {
-        logger.warn('Application validation failed', { 
-          error: validationError.message, 
-          data: applicationData 
+        logger.warn('Application validation failed', {
+          error: validationError.message,
+          data: applicationData
         });
         throw validationError;
       }
@@ -93,16 +93,16 @@ class ApplicationService {
         businessDetails: this.sanitizeBusinessDetails(applicationData.businessDetails),
         licenseDetails: this.sanitizeLicenseDetails(applicationData.licenseDetails),
         declaration: applicationData.declaration,
-        status: 'submitted',  // Initial status for new applications
+        status: 'submitted', // Initial status for new applications
         submittedAt: new Date().toISOString()
       };
 
       // Step 4: Save the application to the database
-      const result = await this.db.createApplication(application);
+      await this.db.createApplication(application);
 
-      logger.info('Application created successfully', { 
+      logger.info('Application created successfully', {
         applicationId: application.applicationId,
-        status: application.status 
+        status: application.status
       });
 
       // Return minimal response data for security
@@ -123,12 +123,12 @@ class ApplicationService {
 
   /**
    * Get application by ID
-   * 
+   *
    * Retrieves a single application from the database by its unique identifier.
    * Includes all application details for display or processing.
-   * 
+   *
    * @param {string} applicationId - The unique application identifier
-   * 
+   *
    * @returns {Object} Complete application data
    * @throws {ValidationError} If application ID is missing or invalid
    * @throws {NotFoundError} If application doesn't exist
@@ -143,7 +143,7 @@ class ApplicationService {
 
       // Retrieve from database
       const application = await this.db.getApplicationById(applicationId);
-      
+
       // Check if application exists
       if (!application) {
         logger.warn('Application not found', { applicationId });
@@ -157,9 +157,9 @@ class ApplicationService {
       if (error instanceof ValidationError || error instanceof NotFoundError) {
         throw error;
       }
-      logger.error('Error retrieving application', { 
-        applicationId, 
-        error: error.message 
+      logger.error('Error retrieving application', {
+        applicationId,
+        error: error.message
       });
       throw new AppError('Failed to retrieve application', 500, 'GET_APPLICATION_ERROR');
     }
@@ -167,15 +167,15 @@ class ApplicationService {
 
   /**
    * Get all applications with pagination and filtering
-   * 
+   *
    * Retrieves a list of applications with optional filtering by status
    * and pagination support for large datasets.
-   * 
+   *
    * @param {Object} options - Query options
    * @param {number} options.limit - Maximum number of applications to return (1-100)
    * @param {number} options.offset - Number of applications to skip for pagination
    * @param {string} options.status - Filter by application status (optional)
-   * 
+   *
    * @returns {Array} Array of application objects
    * @throws {ValidationError} If pagination parameters are invalid
    * @throws {AppError} For database or other errors
@@ -183,9 +183,9 @@ class ApplicationService {
   async getApplications(options = {}) {
     try {
       const {
-        limit = 50,      // Default page size
-        offset = 0,      // Default to first page
-        status = null    // No status filter by default
+        limit = 50, // Default page size
+        offset = 0, // Default to first page
+        status = null // No status filter by default
       } = options;
 
       // Validate pagination parameters
@@ -200,11 +200,11 @@ class ApplicationService {
       // Retrieve applications from database
       const applications = await this.db.getAllApplications(limit, offset, status);
 
-      logger.info('Applications retrieved successfully', { 
-        count: applications.length, 
-        limit, 
-        offset, 
-        status 
+      logger.info('Applications retrieved successfully', {
+        count: applications.length,
+        limit,
+        offset,
+        status
       });
 
       return {
@@ -227,13 +227,13 @@ class ApplicationService {
 
   /**
    * Update application status
-   * 
+   *
    * Changes the status of an existing application. Used by admin users to approve,
    * reject, or change the review status of applications.
-   * 
+   *
    * @param {string} applicationId - The unique application identifier
    * @param {string} status - New status (submitted, under-review, approved, rejected)
-   * 
+   *
    * @returns {Object} Update result from database
    * @throws {ValidationError} If application ID or status is invalid
    * @throws {NotFoundError} If application doesn't exist
@@ -243,7 +243,7 @@ class ApplicationService {
     try {
       // Define valid status transitions
       const validStatuses = ['submitted', 'under-review', 'approved', 'rejected'];
-      
+
       // Validate the new status
       if (!validStatuses.includes(status)) {
         throw new ValidationError(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
@@ -260,10 +260,10 @@ class ApplicationService {
         throw new NotFoundError('Application');
       }
 
-      logger.info('Application status updated', { 
-        applicationId, 
+      logger.info('Application status updated', {
+        applicationId,
         newStatus: status,
-        changes: result.changes 
+        changes: result.changes
       });
 
       return result;
@@ -272,10 +272,10 @@ class ApplicationService {
       if (error instanceof ValidationError || error instanceof NotFoundError) {
         throw error;
       }
-      logger.error('Error updating application status', { 
-        applicationId, 
-        status, 
-        error: error.message 
+      logger.error('Error updating application status', {
+        applicationId,
+        status,
+        error: error.message
       });
       throw new AppError('Failed to update application status', 500, 'UPDATE_STATUS_ERROR');
     }
@@ -283,12 +283,12 @@ class ApplicationService {
 
   /**
    * Delete application
-   * 
+   *
    * Permanently removes an application from the database. This operation
    * cannot be undone. Typically used for cleanup or in admin scenarios.
-   * 
+   *
    * @param {string} applicationId - The unique application identifier
-   * 
+   *
    * @returns {Object} Deletion result from database
    * @throws {ValidationError} If application ID is invalid
    * @throws {NotFoundError} If application doesn't exist
@@ -369,7 +369,10 @@ class ApplicationService {
     const personalRequired = ['firstName', 'lastName', 'email', 'phoneNumber'];
     for (const field of personalRequired) {
       if (!data.personalDetails[field]) {
-        logger.error('VALIDATION ERROR: Missing personal detail', { field, value: data.personalDetails[field] });
+        logger.error('VALIDATION ERROR: Missing personal detail', {
+          field,
+          value: data.personalDetails[field]
+        });
         throw new ValidationError(`Personal details: ${field} is required`);
       }
     }
@@ -378,7 +381,10 @@ class ApplicationService {
     const businessRequired = ['businessName', 'businessType'];
     for (const field of businessRequired) {
       if (!data.businessDetails[field]) {
-        logger.error('VALIDATION ERROR: Missing business detail', { field, value: data.businessDetails[field] });
+        logger.error('VALIDATION ERROR: Missing business detail', {
+          field,
+          value: data.businessDetails[field]
+        });
         throw new ValidationError(`Business details: ${field} is required`);
       }
     }
@@ -387,7 +393,10 @@ class ApplicationService {
     const licenseRequired = ['licenseType', 'premisesType'];
     for (const field of licenseRequired) {
       if (!data.licenseDetails[field]) {
-        logger.error('VALIDATION ERROR: Missing license detail', { field, value: data.licenseDetails[field] });
+        logger.error('VALIDATION ERROR: Missing license detail', {
+          field,
+          value: data.licenseDetails[field]
+        });
         throw new ValidationError(`License details: ${field} is required`);
       }
     }

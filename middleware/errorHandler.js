@@ -8,7 +8,7 @@ class AppError extends Error {
     this.statusCode = statusCode;
     this.code = code;
     this.isOperational = true;
-    
+
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -76,48 +76,42 @@ const logError = (error, req = null) => {
 };
 
 // Async error wrapper
-const asyncHandler = (fn) => {
+const asyncHandler = fn => {
   return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
 // Global error handler middleware
-const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.message = err.message;
+const errorHandler = (err, req, res) => {
+  // Preserve original error object (spreading loses prototype & stack)
+  let error = err;
 
-  // Log error
+  // Log the original error (with stack intact)
   logError(error, req);
 
-  // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
-    const message = 'Resource not found';
-    error = new NotFoundError(message);
+  // Normalization / translation of certain known library errors (example placeholders kept)
+  if (error.name === 'CastError') {
+    error = new NotFoundError('Resource not found');
   }
 
-  // Mongoose duplicate key
-  if (err.code === 11000) {
-    const message = 'Duplicate field value entered';
-    error = new ValidationError(message);
+  if (error.code === 11000) {
+    error = new ValidationError('Duplicate field value entered');
   }
 
-  // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message);
-    error = new ValidationError('Validation failed', message);
+  if (error.name === 'ValidationError' && !(error instanceof ValidationError)) {
+    // Mongoose-style validation error object, convert to our ValidationError
+    const messages = Object.values(error.errors || {}).map(val => val.message);
+    error = new ValidationError('Validation failed', messages);
   }
 
-  // SQLite errors
-  if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+  if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
     error = new ValidationError('Duplicate entry - this record already exists');
   }
-
-  if (err.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
+  if (error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
     error = new ValidationError('Invalid reference - related record not found');
   }
 
-  // Send error response
   const statusCode = error.statusCode || 500;
   const response = {
     success: false,
@@ -125,16 +119,12 @@ const errorHandler = (err, req, res, next) => {
     message: error.message || 'Internal server error'
   };
 
-  // Include error details in development
   if (config.NODE_ENV === 'development') {
     response.stack = error.stack;
-    
-    if (error.details) {
-      response.details = error.details;
-    }
+    if (error.details) response.details = error.details;
   }
 
-  // For form submissions, render error page instead of JSON
+  // For non-API GET requests, render error page
   if (!req.path.startsWith('/api/') && req.method === 'GET') {
     return res.status(statusCode).render('error', {
       title: 'Error',
@@ -154,7 +144,7 @@ const notFoundHandler = (req, res, next) => {
 };
 
 // Validation error formatter
-const formatValidationErrors = (errors) => {
+const formatValidationErrors = errors => {
   return errors.map(error => ({
     field: error.path,
     message: error.msg,
@@ -166,7 +156,7 @@ const formatValidationErrors = (errors) => {
 const handleValidationResult = (req, res, next) => {
   if (req.validationErrors) {
     const formattedErrors = formatValidationErrors(req.validationErrors);
-    
+
     // For API requests, return JSON
     if (req.path.startsWith('/api/')) {
       return res.status(400).json({
@@ -176,11 +166,11 @@ const handleValidationResult = (req, res, next) => {
         details: formattedErrors
       });
     }
-    
+
     // For form requests, continue with errors attached
     req.errors = req.validationErrors;
   }
-  
+
   next();
 };
 
@@ -211,12 +201,12 @@ module.exports = {
   NotFoundError,
   UnauthorizedError,
   ForbiddenError,
-  
+
   // Utilities
   logError,
   asyncHandler,
   formatValidationErrors,
-  
+
   // Middleware
   errorHandler,
   notFoundHandler,

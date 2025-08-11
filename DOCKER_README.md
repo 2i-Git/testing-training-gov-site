@@ -12,17 +12,20 @@ This document provides instructions for running the Alcohol License Training App
 ### Using Docker Compose (Recommended)
 
 1. **Clone the repository and navigate to the project directory:**
+
    ```bash
    git clone <repository-url>
    cd testing-training-gov-site
    ```
 
 2. **Create necessary directories:**
+
    ```bash
    mkdir -p database logs
    ```
 
 3. **Start the application:**
+
    ```bash
    docker compose up -d
    ```
@@ -34,6 +37,7 @@ This document provides instructions for running the Alcohol License Training App
 ### Using Docker only
 
 1. **Build the Docker image:**
+
    ```bash
    docker build -t alcohol-license-app .
    ```
@@ -52,32 +56,36 @@ This document provides instructions for running the Alcohol License Training App
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Node.js environment | `production` |
-| `PORT` | Application port | `3000` |
-| `SESSION_SECRET` | Secret key for sessions | (required in production) |
-| `DB_PATH` | Database file path | `/app/database/alcohol_license.db` |
+| Variable         | Description             | Default                            |
+| ---------------- | ----------------------- | ---------------------------------- |
+| `NODE_ENV`       | Node.js environment     | `production`                       |
+| `PORT`           | Application port        | `3000`                             |
+| `SESSION_SECRET` | Secret key for sessions | (required in production)           |
+| `DB_PATH`        | Database file path      | `/app/database/alcohol_license.db` |
 
 ## Login Credentials
 
 ### Regular User
+
 - Email: `user@example.com`
 - Password: `password123`
 
 ### Admin User
+
 - Email: `admin@example.com`
 - Password: `admin123`
 
 ## Data Persistence
 
 The Docker setup includes volume mounts for:
+
 - **Database**: `./database` - SQLite database files
 - **Logs**: `./logs` - Application log files
 
 ## Health Checks
 
 The container includes health checks that verify the application is running:
+
 - Health check endpoint: `http://localhost:3000/api/health`
 - Check interval: 30 seconds
 - Timeout: 10 seconds
@@ -86,21 +94,25 @@ The container includes health checks that verify the application is running:
 ## Management Commands
 
 ### View logs
+
 ```bash
 docker compose logs -f alcohol-license-app
 ```
 
 ### Stop the application
+
 ```bash
 docker compose down
 ```
 
 ### Restart the application
+
 ```bash
 docker compose restart
 ```
 
 ### Update the application
+
 ```bash
 docker compose down
 docker compose build --no-cache
@@ -108,11 +120,13 @@ docker compose up -d
 ```
 
 ### Access container shell
+
 ```bash
 docker compose exec alcohol-license-app sh
 ```
 
 ### Backup database
+
 ```bash
 docker compose exec alcohol-license-app cp /app/database/alcohol_license.db /app/database/backup_$(date +%Y%m%d_%H%M%S).db
 ```
@@ -122,6 +136,7 @@ docker compose exec alcohol-license-app cp /app/database/alcohol_license.db /app
 For production deployment, consider:
 
 1. **Use environment variables file:**
+
    ```bash
    # Create .env file
    NODE_ENV=production
@@ -151,6 +166,7 @@ For production deployment, consider:
 ## Troubleshooting
 
 ### Container won't start
+
 ```bash
 # Check logs
 docker compose logs alcohol-license-app
@@ -160,6 +176,7 @@ docker compose ps
 ```
 
 ### Database issues
+
 ```bash
 # Check database file permissions
 ls -la database/
@@ -170,6 +187,7 @@ docker compose restart
 ```
 
 ### Port already in use
+
 ```bash
 # Find process using port 3000
 sudo lsof -i :3000
@@ -179,6 +197,7 @@ sudo kill -9 <PID>
 ```
 
 ### Performance issues
+
 ```bash
 # Check container resources
 docker stats alcohol-license-training
@@ -202,6 +221,7 @@ docker compose up -e NODE_ENV=development
 ## Support
 
 For issues and questions:
+
 - Check the application logs
 - Verify environment variables
 - Ensure proper file permissions

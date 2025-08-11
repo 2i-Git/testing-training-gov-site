@@ -1,5 +1,4 @@
 const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
 const fs = require('fs').promises;
 const config = require('../config/config');
 
@@ -20,10 +19,12 @@ class Database {
 
   async connect() {
     return new Promise((resolve, reject) => {
-      this.db = new sqlite3.Database(this.dbPath, (err) => {
+      this.db = new sqlite3.Database(this.dbPath, err => {
         if (err) {
           console.error('Error opening database:', err.message);
-          reject(new DatabaseError(`Failed to connect to database: ${err.message}`, 'CONNECTION_ERROR'));
+          reject(
+            new DatabaseError(`Failed to connect to database: ${err.message}`, 'CONNECTION_ERROR')
+          );
         } else {
           console.log('Connected to SQLite database');
           this.isConnected = true;
@@ -81,7 +82,9 @@ class Database {
       }
 
       // Create indexes for better performance
-      await this.run('CREATE INDEX IF NOT EXISTS idx_application_id ON applications(application_id)');
+      await this.run(
+        'CREATE INDEX IF NOT EXISTS idx_application_id ON applications(application_id)'
+      );
       await this.run('CREATE INDEX IF NOT EXISTS idx_status ON applications(status)');
       await this.run('CREATE INDEX IF NOT EXISTS idx_submitted_at ON applications(submitted_at)');
 
@@ -99,7 +102,7 @@ class Database {
         return;
       }
 
-      this.db.run(sql, params, function(err) {
+      this.db.run(sql, params, function (err) {
         if (err) {
           reject(new DatabaseError(`Query failed: ${err.message}`, 'QUERY_ERROR'));
         } else {
@@ -158,22 +161,25 @@ class Database {
           created_at
         FROM applications
       `;
-      
+
       const params = [];
-      
+
       if (status) {
         query += ' WHERE status = ?';
         params.push(status);
       }
-      
+
       query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
       params.push(limit, offset);
 
       const rows = await this.all(query, params);
-      
+
       return rows.map(row => this.transformApplicationRow(row));
     } catch (error) {
-      throw new DatabaseError(`Failed to get applications: ${error.message}`, 'GET_APPLICATIONS_ERROR');
+      throw new DatabaseError(
+        `Failed to get applications: ${error.message}`,
+        'GET_APPLICATIONS_ERROR'
+      );
     }
   }
 
@@ -199,17 +205,25 @@ class Database {
       `;
 
       const row = await this.get(query, [applicationId]);
-      
+
       return row ? this.transformApplicationRow(row) : null;
     } catch (error) {
-      throw new DatabaseError(`Failed to get application: ${error.message}`, 'GET_APPLICATION_ERROR');
+      throw new DatabaseError(
+        `Failed to get application: ${error.message}`,
+        'GET_APPLICATION_ERROR'
+      );
     }
   }
 
   async createApplication(applicationData) {
     try {
       // Validate required fields
-      const requiredFields = ['applicationId', 'personalDetails', 'businessDetails', 'licenseDetails'];
+      const requiredFields = [
+        'applicationId',
+        'personalDetails',
+        'businessDetails',
+        'licenseDetails'
+      ];
       for (const field of requiredFields) {
         if (!applicationData[field]) {
           throw new DatabaseError(`Missing required field: ${field}`, 'VALIDATION_ERROR');
@@ -221,7 +235,7 @@ class Database {
         JSON.stringify(applicationData.personalDetails);
         JSON.stringify(applicationData.businessDetails);
         JSON.stringify(applicationData.licenseDetails);
-      } catch (jsonError) {
+      } catch {
         throw new DatabaseError('Invalid JSON data in application details', 'INVALID_JSON');
       }
 
@@ -248,7 +262,7 @@ class Database {
       ];
 
       const result = await this.run(query, values);
-      
+
       return {
         id: result.id,
         applicationId: applicationData.applicationId
@@ -257,7 +271,10 @@ class Database {
       if (error instanceof DatabaseError) {
         throw error;
       }
-      throw new DatabaseError(`Failed to create application: ${error.message}`, 'CREATE_APPLICATION_ERROR');
+      throw new DatabaseError(
+        `Failed to create application: ${error.message}`,
+        'CREATE_APPLICATION_ERROR'
+      );
     }
   }
 
@@ -275,7 +292,7 @@ class Database {
       `;
 
       const result = await this.run(query, [status, applicationId]);
-      
+
       return {
         changes: result.changes,
         applicationId: applicationId
@@ -284,20 +301,28 @@ class Database {
       if (error instanceof DatabaseError) {
         throw error;
       }
-      throw new DatabaseError(`Failed to update application status: ${error.message}`, 'UPDATE_STATUS_ERROR');
+      throw new DatabaseError(
+        `Failed to update application status: ${error.message}`,
+        'UPDATE_STATUS_ERROR'
+      );
     }
   }
 
   async deleteApplication(applicationId) {
     try {
-      const result = await this.run('DELETE FROM applications WHERE application_id = ?', [applicationId]);
-      
+      const result = await this.run('DELETE FROM applications WHERE application_id = ?', [
+        applicationId
+      ]);
+
       return {
         changes: result.changes,
         applicationId: applicationId
       };
     } catch (error) {
-      throw new DatabaseError(`Failed to delete application: ${error.message}`, 'DELETE_APPLICATION_ERROR');
+      throw new DatabaseError(
+        `Failed to delete application: ${error.message}`,
+        'DELETE_APPLICATION_ERROR'
+      );
     }
   }
 
@@ -331,13 +356,13 @@ class Database {
   }
 
   async close() {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!this.db) {
         resolve();
         return;
       }
 
-      this.db.close((err) => {
+      this.db.close(err => {
         if (err) {
           console.error('Error closing database:', err.message);
         } else {
