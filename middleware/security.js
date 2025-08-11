@@ -1,38 +1,80 @@
+/**
+ * Security Middleware
+ * 
+ * Provides comprehensive security middleware for the application including:
+ * - Rate limiting to prevent abuse and DoS attacks
+ * - Input sanitization to prevent XSS attacks
+ * - Security headers via Helmet.js
+ * - CSRF protection for forms
+ * 
+ * Security Layers:
+ * 1. Rate Limiting - Prevents brute force and abuse
+ * 2. Input Sanitization - Cleans user input to prevent XSS
+ * 3. Security Headers - Adds browser security protections
+ * 4. CSRF Protection - Prevents cross-site request forgery
+ */
+
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const validator = require('validator');
 const config = require('../config/config');
 
-// Rate limiting middleware
+/**
+ * Create a rate limiter with custom configuration
+ * 
+ * Rate limiting helps prevent abuse by limiting the number of requests
+ * a client can make within a specified time window.
+ * 
+ * @param {number} windowMs - Time window in milliseconds
+ * @param {number} max - Maximum number of requests per window
+ * @param {string} message - Custom message for rate limit exceeded
+ * @returns {Function} Express middleware function
+ */
 const createRateLimiter = (windowMs, max, message) => {
   return rateLimit({
-    windowMs,
-    max,
+    windowMs,                    // Time window for rate limiting
+    max,                        // Maximum requests per window
     message: { 
       success: false, 
       error: 'Too many requests', 
       message 
     },
-    standardHeaders: true,
-    legacyHeaders: false,
-    // Skip rate limiting in test environment
+    standardHeaders: true,      // Include rate limit info in standard headers
+    legacyHeaders: false,       // Don't include legacy rate limit headers
+    // Skip rate limiting in test environment to avoid interference with tests
     skip: () => config.NODE_ENV === 'test'
   });
 };
 
-// Input sanitization middleware
+/**
+ * Input sanitization middleware
+ * 
+ * Recursively sanitizes all string inputs in request body, query, and params
+ * to prevent XSS attacks by escaping HTML characters.
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ */
 const sanitizeInput = (req, res, next) => {
+  /**
+   * Recursively sanitize an object's string properties
+   * 
+   * @param {Object} obj - Object to sanitize
+   */
   const sanitizeObject = (obj) => {
     Object.keys(obj).forEach(key => {
       if (typeof obj[key] === 'string') {
-        // Remove potential XSS attacks
+        // Escape HTML characters and trim whitespace
         obj[key] = validator.escape(obj[key].trim());
       } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+        // Recursively sanitize nested objects
         sanitizeObject(obj[key]);
       }
     });
   };
 
+  // Sanitize all request data sources
   if (req.body) sanitizeObject(req.body);
   if (req.query) sanitizeObject(req.query);
   if (req.params) sanitizeObject(req.params);
@@ -40,14 +82,22 @@ const sanitizeInput = (req, res, next) => {
   next();
 };
 
-// Security headers middleware
+/**
+ * Security headers middleware using Helmet.js
+ * 
+ * Adds various security headers to protect against common attacks:
+ * - Content Security Policy (CSP) to prevent XSS
+ * - X-Frame-Options to prevent clickjacking
+ * - X-Content-Type-Options to prevent MIME sniffing
+ * - And many more security headers
+ */
 const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'"], // Required for GOV.UK Frontend
+      defaultSrc: ["'self'"],                                    // Default to same-origin only
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Allow inline styles for GOV.UK
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],         // Allow Google Fonts
+      scriptSrc: ["'self'", "'unsafe-inline'"],                 // Allow inline scripts (required for GOV.UK Frontend)
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"]
     }

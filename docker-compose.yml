@@ -1,0 +1,42 @@
+services:
+  alcohol-license-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alcohol-license-training
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SESSION_SECRET=your-super-secret-session-key-change-this-in-production
+      - DB_PATH=/app/database/alcohol_license.db
+    volumes:
+      # Persist database and logs
+      - ./database:/app/database
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a reverse proxy for production
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: alcohol-license-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - alcohol-license-app
+  #   restart: unless-stopped
+
+networks:
+  default:
+    name: alcohol-license-network

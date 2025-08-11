@@ -1,94 +1,194 @@
+/**
+ * Application Service
+ * 
+ * This service handles all business logic for alcohol license training applications.
+ * It acts as an abstraction layer between the route handlers and the database,
+ * providing validation, data sanitization, and error handling.
+ * 
+ * Key Responsibilities:
+ * - Application CRUD operations (Create, Read, Update, Delete)
+ * - Data validation and sanitization
+ * - Business logic enforcement
+ * - Error handling and logging
+ * - Status management (submitted, approved, rejected)
+ * 
+ * Design Pattern: Service Layer Pattern
+ * - Encapsulates business logic
+ * - Provides a clean API for route handlers
+ * - Handles database operations through the Database class
+ * - Implements dependency injection for testability
+ */
+
 const { v4: uuidv4 } = require('uuid');
 const { Database, DatabaseError } = require('../database/improved-database');
 const { ValidationError, NotFoundError, AppError } = require('../middleware/errorHandler');
 const { logger } = require('../utils/logger');
 
+/**
+ * ApplicationService class
+ * 
+ * Manages all application-related operations including creation, retrieval,
+ * updating, and deletion of alcohol license training applications.
+ */
 class ApplicationService {
   constructor() {
     this.db = new Database();
   }
 
+  /**
+   * Initialize the service
+   * 
+   * Establishes database connection and ensures the service is ready to handle requests.
+   * This must be called before any other service methods.
+   * 
+   * @throws {AppError} If initialization fails
+   */
   async initialize() {
     try {
       await this.db.connect();
+      logger.info('ApplicationService initialized successfully');
     } catch (error) {
+      logger.error('Failed to initialize ApplicationService', { error: error.message });
       throw new AppError('Failed to initialize application service', 500, 'INIT_ERROR');
     }
   }
 
-  // Create a new application
+  /**
+   * Create a new application
+   * 
+   * Validates the application data, generates a unique ID, sanitizes input,
+   * and saves the application to the database with 'submitted' status.
+   * 
+   * @param {Object} applicationData - The application data from the user form
+   * @param {Object} applicationData.personalDetails - Personal information
+   * @param {Object} applicationData.businessDetails - Business information
+   * @param {Object} applicationData.licenseDetails - License requirements
+   * @param {boolean} applicationData.declaration - Declaration acceptance
+   * 
+   * @returns {Object} Created application summary with ID, status, and timestamp
+   * @throws {ValidationError} If application data is invalid
+   * @throws {DatabaseError} If database operation fails
+   * @throws {AppError} For other unexpected errors
+   */
   async createApplication(applicationData) {
     try {
-      // Validate required data structure
+      // Step 1: Validate the incoming application data structure and content
       try {
         this.validateApplicationData(applicationData);
       } catch (validationError) {
-        console.error('VALIDATION ERROR:', validationError.message, applicationData);
+        logger.warn('Application validation failed', { 
+          error: validationError.message, 
+          data: applicationData 
+        });
         throw validationError;
       }
 
-      // Generate application ID
+      // Step 2: Generate a unique application identifier
       const applicationId = uuidv4();
 
-      // Prepare application data
+      // Step 3: Sanitize and structure the application data
       const application = {
         applicationId,
         personalDetails: this.sanitizePersonalDetails(applicationData.personalDetails),
         businessDetails: this.sanitizeBusinessDetails(applicationData.businessDetails),
         licenseDetails: this.sanitizeLicenseDetails(applicationData.licenseDetails),
         declaration: applicationData.declaration,
-        status: 'submitted',
+        status: 'submitted',  // Initial status for new applications
         submittedAt: new Date().toISOString()
       };
 
-      // Save to database
+      // Step 4: Save the application to the database
       const result = await this.db.createApplication(application);
 
+      logger.info('Application created successfully', { 
+        applicationId: application.applicationId,
+        status: application.status 
+      });
+
+      // Return minimal response data for security
       return {
         applicationId: application.applicationId,
         status: application.status,
         submittedAt: application.submittedAt
       };
     } catch (error) {
+      // Re-throw known error types, wrap unknown errors
       if (error instanceof ValidationError || error instanceof DatabaseError) {
         throw error;
       }
+      logger.error('Unexpected error creating application', { error: error.message });
       throw new AppError('Failed to create application', 500, 'CREATE_APPLICATION_ERROR');
     }
   }
 
-  // Get application by ID
+  /**
+   * Get application by ID
+   * 
+   * Retrieves a single application from the database by its unique identifier.
+   * Includes all application details for display or processing.
+   * 
+   * @param {string} applicationId - The unique application identifier
+   * 
+   * @returns {Object} Complete application data
+   * @throws {ValidationError} If application ID is missing or invalid
+   * @throws {NotFoundError} If application doesn't exist
+   * @throws {AppError} For database or other errors
+   */
   async getApplication(applicationId) {
     try {
+      // Validate input
       if (!applicationId) {
         throw new ValidationError('Application ID is required');
       }
 
+      // Retrieve from database
       const application = await this.db.getApplicationById(applicationId);
       
+      // Check if application exists
       if (!application) {
+        logger.warn('Application not found', { applicationId });
         throw new NotFoundError('Application');
       }
 
+      logger.info('Application retrieved successfully', { applicationId });
       return application;
     } catch (error) {
+      // Re-throw known error types
       if (error instanceof ValidationError || error instanceof NotFoundError) {
         throw error;
       }
+      logger.error('Error retrieving application', { 
+        applicationId, 
+        error: error.message 
+      });
       throw new AppError('Failed to retrieve application', 500, 'GET_APPLICATION_ERROR');
     }
   }
 
-  // Get all applications with pagination
+  /**
+   * Get all applications with pagination and filtering
+   * 
+   * Retrieves a list of applications with optional filtering by status
+   * and pagination support for large datasets.
+   * 
+   * @param {Object} options - Query options
+   * @param {number} options.limit - Maximum number of applications to return (1-100)
+   * @param {number} options.offset - Number of applications to skip for pagination
+   * @param {string} options.status - Filter by application status (optional)
+   * 
+   * @returns {Array} Array of application objects
+   * @throws {ValidationError} If pagination parameters are invalid
+   * @throws {AppError} For database or other errors
+   */
   async getApplications(options = {}) {
     try {
       const {
-        limit = 50,
-        offset = 0,
-        status = null
+        limit = 50,      // Default page size
+        offset = 0,      // Default to first page
+        status = null    // No status filter by default
       } = options;
 
-      // Validate parameters
+      // Validate pagination parameters
       if (limit < 1 || limit > 100) {
         throw new ValidationError('Limit must be between 1 and 100');
       }
@@ -97,7 +197,15 @@ class ApplicationService {
         throw new ValidationError('Offset must be non-negative');
       }
 
+      // Retrieve applications from database
       const applications = await this.db.getAllApplications(limit, offset, status);
+
+      logger.info('Applications retrieved successfully', { 
+        count: applications.length, 
+        limit, 
+        offset, 
+        status 
+      });
 
       return {
         applications,
@@ -108,44 +216,87 @@ class ApplicationService {
         }
       };
     } catch (error) {
+      // Re-throw known error types
       if (error instanceof ValidationError || error instanceof DatabaseError) {
         throw error;
       }
+      logger.error('Error retrieving applications', { error: error.message });
       throw new AppError('Failed to retrieve applications', 500, 'GET_APPLICATIONS_ERROR');
     }
   }
 
-  // Update application status
+  /**
+   * Update application status
+   * 
+   * Changes the status of an existing application. Used by admin users to approve,
+   * reject, or change the review status of applications.
+   * 
+   * @param {string} applicationId - The unique application identifier
+   * @param {string} status - New status (submitted, under-review, approved, rejected)
+   * 
+   * @returns {Object} Update result from database
+   * @throws {ValidationError} If application ID or status is invalid
+   * @throws {NotFoundError} If application doesn't exist
+   * @throws {AppError} For database or other errors
+   */
   async updateApplicationStatus(applicationId, status) {
     try {
+      // Define valid status transitions
       const validStatuses = ['submitted', 'under-review', 'approved', 'rejected'];
       
+      // Validate the new status
       if (!validStatuses.includes(status)) {
         throw new ValidationError(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
       }
 
-      // Check if application exists
+      // Verify application exists (will throw NotFoundError if not found)
       await this.getApplication(applicationId);
 
+      // Update the status in database
       const result = await this.db.updateApplicationStatus(applicationId, status);
 
+      // Double-check that the update actually occurred
       if (result.changes === 0) {
         throw new NotFoundError('Application');
       }
 
+      logger.info('Application status updated', { 
+        applicationId, 
+        newStatus: status,
+        changes: result.changes 
+      });
+
       return result;
     } catch (error) {
+      // Re-throw known error types
       if (error instanceof ValidationError || error instanceof NotFoundError) {
         throw error;
       }
+      logger.error('Error updating application status', { 
+        applicationId, 
+        status, 
+        error: error.message 
+      });
       throw new AppError('Failed to update application status', 500, 'UPDATE_STATUS_ERROR');
     }
   }
 
-  // Delete application
+  /**
+   * Delete application
+   * 
+   * Permanently removes an application from the database. This operation
+   * cannot be undone. Typically used for cleanup or in admin scenarios.
+   * 
+   * @param {string} applicationId - The unique application identifier
+   * 
+   * @returns {Object} Deletion result from database
+   * @throws {ValidationError} If application ID is invalid
+   * @throws {NotFoundError} If application doesn't exist
+   * @throws {AppError} For database or other errors
+   */
   async deleteApplication(applicationId) {
     try {
-      // Check if application exists
+      // Verify application exists before attempting deletion
       await this.getApplication(applicationId);
 
       const result = await this.db.deleteApplication(applicationId);

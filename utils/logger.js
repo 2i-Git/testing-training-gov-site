@@ -1,52 +1,97 @@
+/**
+ * Logging Utility
+ * 
+ * Provides comprehensive logging functionality using Winston logger.
+ * Includes request/response logging, error tracking, and log file management.
+ * 
+ * Features:
+ * - Structured JSON logging for production
+ * - Console logging for development
+ * - Request/response timing and details
+ * - Error logging with stack traces
+ * - Log file rotation and size management
+ * - Application event logging
+ * 
+ * Log Levels:
+ * - error: Error conditions requiring immediate attention
+ * - warn: Warning conditions that should be monitored
+ * - info: General information about application flow
+ * - debug: Detailed debugging information (development only)
+ */
+
 const winston = require('winston');
 const path = require('path');
 const config = require('../config/config');
 
-// Create logs directory if it doesn't exist
+/**
+ * Initialize logging directory
+ * 
+ * Ensures the logs directory exists before creating log files.
+ * Creates the directory recursively if it doesn't exist.
+ */
 const fs = require('fs');
 const logsDir = path.dirname(config.logging.file);
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Custom log format
+/**
+ * Custom log format configuration
+ * 
+ * Creates a standardized log format with:
+ * - ISO timestamp for precise timing
+ * - Error stack traces for debugging
+ * - JSON structure for parsing and analysis
+ */
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.errors({ stack: true }),
-  winston.format.json()
+  winston.format.errors({ stack: true }),           // Include stack traces for errors
+  winston.format.json()                             // Structured JSON format
 );
 
-// Create logger instance
+/**
+ * Winston logger instance
+ * 
+ * Main logger with file transports and service metadata.
+ * Includes automatic log rotation to prevent disk space issues.
+ */
 const logger = winston.createLogger({
-  level: config.logging.level,
+  level: config.logging.level,                      // Minimum log level from config
   format: logFormat,
   defaultMeta: { 
-    service: config.app.name,
-    version: config.app.version 
+    service: config.app.name,                       // Service name for log identification
+    version: config.app.version                     // Version for deployment tracking
   },
   transports: [
-    // File transport for all logs
+    // Main log file - all log levels
     new winston.transports.File({
       filename: config.logging.file,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-      tailable: true
+      maxsize: 5242880,                             // 5MB max file size
+      maxFiles: 5,                                  // Keep 5 rotated files
+      tailable: true                                // New logs go to end of file
     }),
     
-    // Separate file for errors
+    // Error-only log file for quick error analysis
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
+      maxsize: 5242880,                             // 5MB max file size
+      maxFiles: 5,                                  // Keep 5 rotated files
       tailable: true
     })
   ]
 });
 
-// Add console transport in development
+/**
+ * Development Environment Enhancements
+ * 
+ * In non-production environments:
+ * - Add console logging with colors
+ * - Handle undefined error messages gracefully
+ * - Use simple format for console readability
+ */
 if (config.NODE_ENV !== 'production') {
-  // Wrap logger.error to prevent undefined messages in console
+  // Wrap logger.error to prevent undefined messages in console output
   const originalError = logger.error.bind(logger);
   logger.error = function(message, ...args) {
     if (typeof message === 'undefined' || message === undefined) {
@@ -54,23 +99,37 @@ if (config.NODE_ENV !== 'production') {
     }
     return originalError(message, ...args);
   };
+  
+  // Add colorized console output for development
   logger.add(new winston.transports.Console({
     format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
+      winston.format.colorize(),                    // Color-code log levels
+      winston.format.simple()                       // Simple readable format
     )
   }));
 }
 
-// Request logging middleware
+/**
+ * Request logging middleware
+ * 
+ * Logs HTTP request and response details including:
+ * - Request method, URL, and client information
+ * - Response status code and timing
+ * - Error details for failed requests
+ * - Filters out noise from font/asset 404s
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ */
 const requestLogger = (req, res, next) => {
   const start = Date.now();
   
-  // Suppress logging for 404 requests to fonts
+  // Filter out noisy 404 requests for fonts and assets to keep logs clean
   const isFont404 = req.url.includes('/fonts/') || req.url.includes('fonts.googleapis.com');
 
   if (!isFont404) {
-    // Log request
+    // Log incoming request details
     logger.info('Request started', {
       method: req.method,
       url: req.url,
