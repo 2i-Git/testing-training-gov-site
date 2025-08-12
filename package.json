@@ -113,6 +113,6 @@
     "**/*.{json,md,yml,yaml}": "prettier --write"
   },
   "simple-git-hooks": {
-    "pre-commit": "npm run audit && npm run format:check && npm run lint && npx lint-staged"
+    "pre-commit": "npm run audit && npm run format:check && npm run lint && npm test && npx lint-staged"
   }
 }
