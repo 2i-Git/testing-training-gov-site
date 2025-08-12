@@ -135,7 +135,6 @@ testing-training-gov-site/
 ├── 📁 config/                 # Configuration management
 │   └── config.js              # Centralized app configuration
 ├── 📁 database/               # Database layer
-│   ├── database.js            # Basic database operations
 │   └── improved-database.js   # Enhanced database service
 ├── 📁 middleware/             # Express middleware
 │   ├── errorHandler.js        # Error handling and custom errors
@@ -802,7 +801,6 @@ testing-training-gov-site/
 ├── server.js                 # Main server file
 ├── package.json             # Dependencies and scripts
 ├── database/
-│   ├── database.js          # Database class and operations
 │   └── alcohol_license.db   # SQLite database file
 ├── public/                  # Frontend files
 │   ├── index.html          # Start page

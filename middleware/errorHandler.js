@@ -83,7 +83,7 @@ const asyncHandler = fn => {
 };
 
 // Global error handler middleware
-const errorHandler = (err, req, res) => {
+const errorHandler = (err, req, res, _next) => {
   // Preserve original error object (spreading loses prototype & stack)
   let error = err;
 
@@ -138,9 +138,9 @@ const errorHandler = (err, req, res) => {
 };
 
 // 404 handler
-const notFoundHandler = (req, res, next) => {
+const notFoundHandler = (req, res, _next) => {
   const error = new NotFoundError(`Route ${req.originalUrl} not found`);
-  next(error);
+  _next(error);
 };
 
 // Validation error formatter

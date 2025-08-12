@@ -1,18 +1,19 @@
-const Database = require('./database/database');
+const { Database } = require('../database/improved-database');
 
 async function initializeDatabase() {
   console.log('Initializing database...');
 
   const db = new Database();
 
-  // Database initialization is handled in the constructor
-  // This script just ensures the database is created
-
-  setTimeout(async () => {
+  try {
+    await db.connect();
     console.log('Database initialization complete.');
+  } catch (err) {
+    console.error('Failed to initialize database:', err.message || err);
+    process.exitCode = 1;
+  } finally {
     await db.close();
-    process.exit(0);
-  }, 1000);
+  }
 }
 
 initializeDatabase();

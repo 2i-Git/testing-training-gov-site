@@ -42,6 +42,7 @@ const validators = {
       'hotel',
       'off-licence',
       'supermarket',
+      'shop', // added shop
       'other'
     ];
     return validTypes.includes(value);
@@ -61,6 +62,7 @@ const validators = {
       'hotel',
       'off-licence',
       'supermarket',
+      'shop', // added shop for premises consistency
       'other'
     ];
     return validTypes.includes(value);

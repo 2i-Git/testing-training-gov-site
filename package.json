@@ -22,7 +22,10 @@
     "docker:compose:logs": "docker compose logs -f",
     "docker:compose:build": "docker compose build --no-cache",
     "restart": "npm stop --if-present && npm start",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "cleanup:unfinalized": "node scripts/cleanup-unfinalized.js",
+    "cleanup:unfinalized:dry": "node scripts/cleanup-unfinalized.js --dry-run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "body-parser": "^1.20.3",
@@ -42,6 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@playwright/test": "^1.54.2",
     "@stylistic/eslint-plugin": "^2.13.0",
     "audit-ci": "^7.0.1",
     "depcheck": "^1.4.7",
@@ -56,6 +60,9 @@
     "supertest": "^6.3.3"
   },
   "jest": {
+    "setupFiles": [
+      "<rootDir>/tests/jest.env.setup.js"
+    ],
     "collectCoverage": true,
     "collectCoverageFrom": [
       "**/*.js",
@@ -65,6 +72,9 @@
       "!public/**",
       "!config/**",
       "!scripts/**",
+      "!tests/**",
+      "!playwright.config.js",
+      "!eslint.config.js",
       "!**/*.test.js"
     ],
     "coverageDirectory": "coverage",
@@ -80,7 +90,11 @@
         "lines": 70,
         "statements": 70
       }
-    }
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/e2e/"
+    ]
   },
   "keywords": [
     "training",

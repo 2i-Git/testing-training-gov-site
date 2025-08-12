@@ -18,6 +18,9 @@ module.exports = [
       globals: { ...globals.node, ...globals.jest }
     },
     plugins: { import: importPlugin, security },
-    rules: {}
+    rules: {
+      // Allow intentionally unused args when prefixed with underscore (e.g., Express next)
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+    }
   }
 ];

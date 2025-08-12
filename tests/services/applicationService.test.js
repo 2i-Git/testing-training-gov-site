@@ -136,3 +136,67 @@ describe('ApplicationService', () => {
     ).rejects.toBeInstanceOf(ValidationError);
   });
 });
+
+describe('ApplicationService extra paths (merged)', () => {
+  let service;
+  beforeEach(async () => {
+    service = new ApplicationService();
+    await service.initialize();
+  });
+  afterEach(() => jest.clearAllMocks());
+
+  const sessionData = () => ({
+    firstName: ' Jane ',
+    lastName: ' Doe ',
+    dobDay: '01',
+    dobMonth: '01',
+    dobYear: '1990',
+    email: 'JANE.DOE@EXAMPLE.COM',
+    phoneNumber: '07123 456 789',
+    addressLine1: '1 Test St',
+    addressLine2: '',
+    addressTown: 'Testville',
+    addressCounty: '',
+    addressPostcode: 'ab1 2cd',
+    businessName: 'Biz Ltd',
+    companyNumber: '12345678',
+    businessType: 'shop',
+    businessAddressLine1: '2 Biz St',
+    businessAddressLine2: '',
+    businessAddressTown: 'Biztown',
+    businessAddressCounty: '',
+    businessAddressPostcode: 'ef3 4gh',
+    businessPhone: '0207 000 0000',
+    businessEmail: 'INFO@BIZ.COM',
+    licenseType: 'premises',
+    premisesType: 'shop',
+    premisesAddressLine1: '3 Prem Rd',
+    premisesAddressLine2: '',
+    premisesAddressTown: 'Premcity',
+    premisesAddressCounty: '',
+    premisesAddressPostcode: 'jk5 6lm',
+    activities: 'sale-on',
+    mondayHours: '09:00-17:00'
+  });
+
+  test('processApplicationFromFormData success normalizes activities to array', async () => {
+    mockDbInstance.createApplication.mockResolvedValue({ id: 1 });
+    const result = await service.processApplicationFromFormData(sessionData(), 'yes');
+    expect(result).toHaveProperty('applicationId');
+    expect(result).toHaveProperty('status', 'submitted');
+    const saved = mockDbInstance.createApplication.mock.calls[0][0];
+    expect(saved.licenseDetails.activities).toEqual(['sale-on']);
+  });
+
+  test('deleteApplication throws NotFoundError when no rows deleted', async () => {
+    mockDbInstance.getApplicationById.mockResolvedValue({ applicationId: 'id1' });
+    mockDbInstance.deleteApplication.mockResolvedValue({ changes: 0 });
+    await expect(service.deleteApplication('id1')).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  test('processApplicationFromFormData missing sessionData throws ValidationError', async () => {
+    await expect(service.processApplicationFromFormData(undefined, 'yes')).rejects.toBeInstanceOf(
+      ValidationError
+    );
+  });
+});
