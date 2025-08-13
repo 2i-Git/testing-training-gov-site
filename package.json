@@ -22,7 +22,7 @@
     "docker:compose:logs": "docker compose logs -f",
     "docker:compose:build": "docker compose build --no-cache",
     "restart": "npm stop --if-present && npm start",
-    "prepare": "simple-git-hooks",
+    "prepare": "node -e \"if(process.env.NODE_ENV!=='production'){require('child_process').execSync('simple-git-hooks',{stdio:'inherit'})}\"",
     "cleanup:unfinalized": "node scripts/cleanup-unfinalized.js",
     "cleanup:unfinalized:dry": "node scripts/cleanup-unfinalized.js --dry-run",
     "e2e": "playwright test"

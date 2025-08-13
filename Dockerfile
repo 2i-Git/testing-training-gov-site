@@ -1,26 +1,33 @@
-# Use the official Node.js 18 LTS image
-FROM node:18-alpine
+# Use Debian-based Node.js 18 slim image
+FROM node:18-slim
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Install curl for health checks (and certs) - slim images are minimal
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container
 WORKDIR /app
 
+# Ensure production environment for dependency installation
+ENV NODE_ENV=production
+
 # Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
-# Install dependencies (using --omit=dev instead of deprecated --only=production)
-RUN npm ci --omit=dev
+# Install production dependencies; install build tools temporarily for any native modules
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 make g++ libsqlite3-dev \
+  && npm ci --only=production \
+  && apt-get purge -y --auto-remove python3 make g++ libsqlite3-dev \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy the rest of the application code
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p logs database
-
-# Set proper permissions
-RUN chown -R node:node /app
+# Create necessary directories and set permissions
+RUN mkdir -p logs database \
+  && chown -R node:node /app
 
 # Switch to non-root user
 USER node
@@ -29,7 +36,6 @@ USER node
 EXPOSE 3000
 
 # Define environment variables
-ENV NODE_ENV=local
 ENV PORT=3000
 
 # Health check
