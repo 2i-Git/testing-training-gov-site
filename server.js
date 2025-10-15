@@ -76,6 +76,11 @@ app.use('/govuk/assets', express.static(path.join(__dirname, 'public/govuk/asset
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
+// Serve GOV.UK Frontend assets at /assets to match stylesheet paths
+app.use(
+  '/assets',
+  express.static(path.join(__dirname, 'node_modules/govuk-frontend/dist/govuk/assets'))
+);
 
 // Request parsing and security
 app.use(cors({ origin: config.security.corsOrigin })); // Enable CORS with origin restrictions

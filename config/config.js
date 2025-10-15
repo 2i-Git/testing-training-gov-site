@@ -31,8 +31,9 @@ const config = {
   PORT: parseInt(process.env.PORT) || 3000,
 
   // Database Configuration
-  // SQLite database path and connection settings
+  // Database configuration: Prefer Postgres via DATABASE_URL; fallback to SQLite path
   database: {
+    url: process.env.DATABASE_URL || '',
     path: process.env.DB_PATH || path.join(__dirname, '../database/alcohol_license.db'),
     connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10
   },
@@ -90,7 +91,11 @@ const config = {
  */
 if (config.NODE_ENV === 'production') {
   // List of environment variables that MUST be set in production
-  const requiredEnvVars = ['SESSION_SECRET', 'DB_PATH'];
+  const requiredEnvVars = ['SESSION_SECRET'];
+  // If not using SQLite, require DATABASE_URL
+  if (!process.env.DB_PATH) {
+    requiredEnvVars.push('DATABASE_URL');
+  }
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
   // Fail fast if required variables are missing
