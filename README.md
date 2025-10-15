@@ -89,7 +89,9 @@ npm install
 cp .env.example .env
 
 # Initialize the database
-npm run init-db
+Optional: run DB migrations
+
+  npm run db:migrate
 
 # Start the application
 npm start
@@ -135,7 +137,7 @@ testing-training-gov-site/
 ├── 📁 config/                 # Configuration management
 │   └── config.js              # Centralized app configuration
 ├── 📁 database/               # Database layer
-│   └── improved-database.js   # Enhanced database service
+│   └── knex-database.js       # Knex-based database adapter (SQLite/Postgres)
 ├── 📁 middleware/             # Express middleware
 │   ├── errorHandler.js        # Error handling and custom errors
 │   ├── security.js            # Security middleware (CSRF, rate limiting)
@@ -266,7 +268,9 @@ npm install
 cp .env.example .env
 
 # Initialize database with sample data
-npm run init-db
+Run migrations (dev):
+
+  npm run db:migrate
 
 # Start development server with hot reloading
 npm run dev
@@ -286,7 +290,7 @@ npm run dev              # Start with nodemon (hot reloading)
 npm start               # Start production server
 
 # Database
-npm run init-db         # Initialize database schema
+npm run db:migrate      # Apply DB migrations
 npm run reset-db        # Reset database (WARNING: deletes all data)
 
 # Testing
@@ -572,7 +576,9 @@ curl -X PATCH http://localhost:3000/api/applications/{applicationId}/status \
 ls -la database/
 
 # Reinitialize database
-npm run init-db
+Run migrations in CI or first run:
+
+  npm run db:migrate
 
 # Check database path in .env file
 ```
@@ -670,7 +676,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 5. **Initialize the database** (optional - happens automatically)
    ```bash
-   npm run init-db
+   npm run db:migrate
    ```
 
 ## Usage

@@ -20,7 +20,7 @@
  */
 
 const { v4: uuidv4 } = require('uuid');
-const { Database, DatabaseError } = require('../database/improved-database');
+const { Database, DatabaseError } = require('../database/knex-database');
 const { ValidationError, NotFoundError, AppError } = require('../middleware/errorHandler');
 const { logger } = require('../utils/logger');
 

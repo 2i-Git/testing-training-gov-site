@@ -2,7 +2,7 @@ const { ValidationError, NotFoundError } = require('../../middleware/errorHandle
 
 // Mock database module BEFORE requiring service
 let mockDbInstance;
-jest.mock('../../database/improved-database', () => {
+jest.mock('../../database/knex-database', () => {
   class DatabaseMock {
     constructor() {
       this.connect = jest.fn().mockResolvedValue();

@@ -19,6 +19,7 @@ test('user submits app and admin accepts it', async ({ page }) => {
   const login = new LoginPage(page);
   await login.goto();
   await login.login('user@example.com', 'password123');
+  console.log('✅ User login complete');
 
   // Personal details
   const pd = new PersonalDetailsPage(page);
@@ -36,6 +37,7 @@ test('user submits app and admin accepts it', async ({ page }) => {
     addressPostcode: 'SW1A 1AA'
   });
   await pd.continue();
+  console.log('✅ Personal details submitted');
 
   // Business details
   const bd = new BusinessDetailsPage(page);
@@ -50,6 +52,7 @@ test('user submits app and admin accepts it', async ({ page }) => {
     businessEmail: `info.${uniq}@biz.com`
   });
   await bd.continue();
+  console.log('✅ Business details submitted');
 
   // Licence details
   const ld = new LicenseDetailsPage(page);
@@ -60,27 +63,33 @@ test('user submits app and admin accepts it', async ({ page }) => {
     premisesAddressPostcode: 'W1A 0AX'
   });
   await ld.continue();
+  console.log('✅ Licence details submitted');
 
   // Summary + submit
   const summary = new SummaryPage(page);
   await summary.assertOnPage?.();
   await summary.submit();
+  console.log('✅ Application summary submitted');
 
   // Confirmation
   const conf = new ConfirmationPage(page);
   await conf.assertSubmitted();
+  console.log('✅ Application confirmation page reached');
 
   // Admin flow
   const adminLogin = new AdminLoginPage(page);
   await adminLogin.goto();
   await adminLogin.login('admin@example.com', 'admin123');
+  console.log('✅ Admin login complete');
 
   const adminApps = new AdminApplicationsPage(page);
   await adminApps.assertOnPage();
   await adminApps.acceptApplicant(fullName);
+  console.log('✅ Admin accepted applicant');
 
   // Success banner and approved status
   await expect(page).toHaveURL(/\/admin\/applications\?success=/);
   await page.getByText('Application approved successfully').waitFor();
   await adminApps.expectApproved(fullName);
+  console.log('✅ Application approved and success banner shown');
 });
