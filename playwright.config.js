@@ -14,9 +14,9 @@ module.exports = defineConfig({
   },
   webServer: {
     command:
-      'NODE_ENV=test DATABASE_URL=postgres://postgres:postgres@localhost:5433/alcohols_test node scripts/db-runner.js migrate && NODE_ENV=test DATABASE_URL=postgres://postgres:postgres@localhost:5433/alcohols_test node scripts/start-test-server.js',
+      'NODE_ENV=test DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5433/alcohols_test node scripts/db-runner.js migrate && NODE_ENV=test DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5433/alcohols_test node scripts/start-test-server.js',
     url: 'http://localhost:3000',
-    reuseExistingServer: false,
+    reuseExistingServer: true,
     timeout: 90000
   }
 });
