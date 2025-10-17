@@ -82,6 +82,17 @@ const asyncHandler = fn => {
   };
 };
 
+const express = require('express');
+const router = express.Router();
+router.get('/healthz', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
+
+module.exports = router;
 // Global error handler middleware
 const errorHandler = (err, req, res, _next) => {
   // Preserve original error object (spreading loses prototype & stack)
