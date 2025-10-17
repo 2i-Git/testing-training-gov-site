@@ -5,130 +5,110 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   install:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
+          node-version: 18.x
+          cache: npm
+      - run: npm ci
 
   lint:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run lint
-        run: npm run lint
+          node-version: 18.x
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
 
   test:
     needs: install
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" \
+          --health-interval 10s \
+          --health-timeout 5s \
+          --health-retries 5
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run unit tests
-        run: npm test
+          node-version: 18.x
+          cache: npm
+      - run: npm ci
+      - run: npm test
 
   audit:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run npm audit
-        run: npm audit --audit-level=high --json
+          node-version: 18.x
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high --json
 
-  zap:
+  sast:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: returntocorp/semgrep-action@v1
         with:
-          node-version: '18.x'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Start app server
-        run: |
-          npm run start &
-          sleep 10
-      - name: Run ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.10.0
+          config: p/ci
+          generateSarif: true
+      - uses: github/codeql-action/upload-sarif@v3
         with:
-          target: 'http://localhost:3000'
-      - name: Stop app server
-        if: always()
-        run: pkill -f "node server.js" || true
+          sarif_file: semgrep.sarif
 
   e2e:
-    needs: [lint, test, audit, zap]
+    needs: [lint, test, audit, sast]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Start services for E2E
-        run: |
+          node-version: 18.x
+          cache: npm
+      - run: npm ci
+      - run: |
           docker compose -f docker-compose.dev.yml up -d
           sleep 10
-      - name: Run Playwright E2E tests
-        run: npx playwright test
-      - name: Stop services
-        if: always()
+      - run: npx playwright test
+      - if: always()
         run: docker compose -f docker-compose.dev.yml down
 
   docker:
     needs: e2e
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build Docker image
-        run: docker build -t damiencookedocker/personal_repo:latest .
-      - name: Push Docker image to Docker Hub
-        run: docker push damiencookedocker/personal_repo:latest
+      - run: docker build -t damiencookedocker/personal_repo:latest .
+      - run: docker push damiencookedocker/personal_repo:latest

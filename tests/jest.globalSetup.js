@@ -2,7 +2,7 @@
 module.exports = async () => {
   const { Client } = require('pg');
   const adminUrl =
-    process.env.PG_ADMIN_URL || 'postgres://postgres:postgres@localhost:5433/postgres';
+    process.env.PG_ADMIN_URL || 'postgres://postgres:postgres@127.0.0.1:5433/postgres';
   const testDbName = 'alcohols_test';
 
   // 1) Reset test database (terminate connections, drop, recreate)
@@ -20,7 +20,7 @@ module.exports = async () => {
 
   // 2) Run migrations against the fresh test DB
   process.env.DATABASE_URL =
-    process.env.DATABASE_URL || `postgres://postgres:postgres@localhost:5433/${testDbName}`;
+    process.env.DATABASE_URL || `postgres://postgres:postgres@127.0.0.1:5433/${testDbName}`;
   const knexConfig = require('../knexfile');
   const knex = require('knex')(knexConfig);
   try {
