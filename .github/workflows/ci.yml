@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Semgrep
-        uses: semgrep/setup-semgrep@v1
+        uses: returntocorp/setup-semgrep@v1
       - name: Run Semgrep (generate SARIF)
         run: |
           semgrep --config p/ci --sarif -o semgrep.sarif || true
