@@ -6,7 +6,7 @@ const globals = require('globals');
 
 module.exports = [
   // Global ignores (public assets, build artifacts, etc.)
-  { ignores: ['public/**', 'coverage/**', 'logs/**', 'node_modules/**'] },
+  { ignores: ['public/**', 'coverage/**', 'logs/**', 'node_modules/**', '.github/workflows/**'] },
   // Base recommended rules
   js.configs.recommended,
   // Project JS (excluding ignored paths above)

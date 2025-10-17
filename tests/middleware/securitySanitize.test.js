@@ -8,9 +8,9 @@ describe('sanitizeInput removal/arrays', () => {
       params: { id: '<b>1</b>' }
     };
     sanitizeInput(req, {}, () => {});
-    expect(req.body.k).toBe('&lt;i&gt;x&lt;&#x2F;i&gt;');
-    expect(req.query.q).toBe('&lt;svg onload=1&gt;');
-    expect(req.params.id).toBe('&lt;b&gt;1&lt;&#x2F;b&gt;');
+    expect(req.body.k).toBe('&#x3C;i&#x3E;x&#x3C;/i&#x3E;');
+    expect(req.query.q).toBe('&#x3C;svg onload=1&#x3E;');
+    expect(req.params.id).toBe('&#x3C;b&#x3E;1&#x3C;/b&#x3E;');
   });
 
   test('sanitizes arrays of strings', () => {
@@ -20,6 +20,6 @@ describe('sanitizeInput removal/arrays', () => {
       params: {}
     };
     sanitizeInput(req, {}, () => {});
-    expect(req.body.list).toEqual(['&lt;a&gt;', 'ok', '&lt;b&gt;']);
+    expect(req.body.list).toEqual(['&#x3C;a&#x3E;', 'ok', '&#x3C;b&#x3E;']);
   });
 });

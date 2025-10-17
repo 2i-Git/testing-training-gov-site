@@ -49,7 +49,7 @@
     "pg": "^8.13.1",
     "sqlite3": "^5.1.7",
     "uuid": "^9.0.1",
-    "validator": "^13.15.15",
+    "he": "^1.2.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {
@@ -67,6 +67,9 @@
     "prettier": "^3.3.3",
     "simple-git-hooks": "^2.11.0",
     "supertest": "^6.3.3"
+  },
+  "overrides": {
+    "tar-fs": "^2.1.4"
   },
   "jest": {
     "setupFiles": [

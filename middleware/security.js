@@ -16,7 +16,7 @@
 
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const validator = require('validator');
+const he = require('he');
 const config = require('../config/config');
 
 /**
@@ -62,16 +62,37 @@ const sanitizeInput = (req, res, next) => {
    *
    * @param {Object} obj - Object to sanitize
    */
+  if (process.env.NODE_ENV === 'test') {
+    console.log('[sanitizeInput] BEFORE', JSON.stringify(req.body));
+  }
   const sanitizeObject = obj => {
-    Object.keys(obj).forEach(key => {
-      if (typeof obj[key] === 'string') {
-        // Escape HTML characters and trim whitespace
-        obj[key] = validator.escape(obj[key].trim());
-      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-        // Recursively sanitize nested objects
-        sanitizeObject(obj[key]);
+    if (Array.isArray(obj)) {
+      for (let i = 0; i < obj.length; i++) {
+        if (typeof obj[i] === 'string') {
+          const before = obj[i];
+          obj[i] = he.encode(obj[i].trim());
+          const after = obj[i];
+          if (process.env.NODE_ENV === 'test') {
+            console.log(`[sanitizeInput] array[${i}], before: ${before}, after: ${after}`);
+          }
+        } else if (typeof obj[i] === 'object' && obj[i] !== null) {
+          sanitizeObject(obj[i]);
+        }
       }
-    });
+    } else if (typeof obj === 'object' && obj !== null) {
+      Object.keys(obj).forEach(key => {
+        if (typeof obj[key] === 'string') {
+          const before = obj[key];
+          obj[key] = he.encode(obj[key].trim());
+          const after = obj[key];
+          if (process.env.NODE_ENV === 'test') {
+            console.log(`[sanitizeInput] key: ${key}, before: ${before}, after: ${after}`);
+          }
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          sanitizeObject(obj[key]);
+        }
+      });
+    }
   };
 
   // Sanitize all request data sources
@@ -79,6 +100,9 @@ const sanitizeInput = (req, res, next) => {
   if (req.query) sanitizeObject(req.query);
   if (req.params) sanitizeObject(req.params);
 
+  if (process.env.NODE_ENV === 'test') {
+    console.log('[sanitizeInput] AFTER', JSON.stringify(req.body));
+  }
   next();
 };
 

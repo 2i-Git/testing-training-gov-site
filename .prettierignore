@@ -1,0 +1,8 @@
+# Ignore GitHub Actions workflows
+.github/workflows/**
+
+# Common generated folders
+node_modules
+coverage
+logs
+public
