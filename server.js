@@ -96,6 +96,14 @@ app.use(csrfProtection); // CSRF token protection
  * database connectivity and proper dependency injection. This prevents
  * "Database not connected" errors during startup.
  */
+// Health check endpoint (works in all environments)
+app.get('/healthz', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * Application Service and Server Initialization
@@ -146,7 +154,9 @@ async function startServer() {
         version: config.app.version
       });
       if (config.NODE_ENV !== 'test') {
-        console.log(`Alcohol License Training App running on http://localhost:${port}`);
+        // Use APP_HOST from environment or config, fallback to localhost
+        const host = process.env.APP_HOST || config.APP_HOST || 'localhost';
+        console.log(`Alcohol License Training App running on http://${host}:${port}`);
       }
     });
     return server;
