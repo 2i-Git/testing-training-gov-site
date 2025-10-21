@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 exports.up = async knex => {
   const has = await knex.schema.hasTable('applications');
   if (!has) {

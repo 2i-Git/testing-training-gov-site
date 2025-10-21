@@ -12,7 +12,6 @@ services:
       - SESSION_SECRET=your-super-secret-session-key-change-this-in-production
       - DATABASE_URL=${DATABASE_URL:-postgres://postgres:postgres@db:5432/alcohols}
     volumes:
-      # Persist logs
       - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
@@ -30,7 +29,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=alcohols
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - pgdata_prod:/var/lib/postgresql/data
     healthcheck:

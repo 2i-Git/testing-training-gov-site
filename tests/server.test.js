@@ -4,8 +4,19 @@ describe('server init/start extra paths', () => {
     process.env.NODE_ENV = 'test';
     jest.resetModules();
   });
-  afterAll(() => {
+  afterAll(async () => {
     process.env.NODE_ENV = origEnv;
+    try {
+      const serverMod = require('../server');
+      if (serverMod && serverMod.applicationService && serverMod.applicationService.close) {
+        await serverMod.applicationService.close();
+      }
+      if (serverMod && serverMod.app) {
+        serverMod.app.locals.initialized = false;
+      }
+    } catch {
+      // ignore errors in teardown
+    }
   });
 
   test('initApp is idempotent (initialize called once)', async () => {

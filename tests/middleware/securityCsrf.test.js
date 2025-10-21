@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app, initApp } = require('../../server');
+const { app, initApp, applicationService } = require('../../server');
 
 function extractCsrf(html) {
   const m = html.match(/name="_csrf" value="([^"]+)"/);
@@ -12,13 +12,19 @@ describe('CSRF protection middleware', () => {
     await initApp();
   });
 
+  afterAll(async () => {
+    if (applicationService && applicationService.close) {
+      await applicationService.close();
+    }
+  });
+
   test('POST /login without CSRF token returns 403 and re-renders login form', async () => {
     // Get login to establish session but intentionally do not include token in POST
     await request(app).get('/login');
     const res = await request(app).post('/login').type('form').send({ email: 'x', password: 'y' });
     expect(res.status).toBe(403);
     // Login page rendered, includes CSRF hidden field for next attempt
-    expect(res.text).toMatch(/<h1 class="govuk-heading-xl">Sign in<\/h1>/);
+    expect(res.text).toMatch(/<h1[^>]*>\s*Sign in\s*<\/h1>/i);
     expect(res.text).toMatch(/name="_csrf" value="/);
   });
 

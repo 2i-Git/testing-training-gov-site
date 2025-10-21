@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app, initApp } = require('../../server');
+const { app, initApp, applicationService } = require('../../server');
 
 function extractCsrf(html) {
   const match = html.match(/name="_csrf" value="([^"]+)"/);
@@ -10,6 +10,12 @@ describe('User auth and form flow routes', () => {
   beforeAll(async () => {
     process.env.NODE_ENV = 'test';
     await initApp();
+  });
+
+  afterAll(async () => {
+    if (applicationService && applicationService.close) {
+      await applicationService.close();
+    }
   });
 
   test('redirects unauthenticated user to /login for protected route', async () => {

@@ -33,6 +33,12 @@ describe('Admin routes flow', () => {
     await initApp();
   });
 
+  afterAll(async () => {
+    if (applicationService && applicationService.close) {
+      await applicationService.close();
+    }
+  });
+
   test('GET /admin/login serves login page with CSRF token', async () => {
     const res = await request(app).get('/admin/login');
     expect(res.status).toBe(200);

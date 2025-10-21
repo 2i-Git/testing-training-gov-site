@@ -72,6 +72,8 @@ nunjucks.configure(['views', 'node_modules/govuk-frontend/dist'], {
 app.set('view engine', 'njk');
 
 // Static file serving for assets
+// Serve GOV.UK assets from public first, then node_modules as fallback
+app.use('/govuk/assets', express.static(path.join(__dirname, 'public/govuk/assets')));
 app.use(
   '/govuk/assets',
   express.static(path.join(__dirname, 'node_modules/govuk-frontend/dist/govuk/assets'))

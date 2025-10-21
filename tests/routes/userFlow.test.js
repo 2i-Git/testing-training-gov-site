@@ -12,6 +12,10 @@ describe('User routes end-to-end flow', () => {
     await initApp();
   });
 
+  afterAll(async () => {
+    await applicationService.close();
+  });
+
   test('happy path: login -> personal -> business -> license -> summary -> submit -> confirmation', async () => {
     const agent = request.agent(app);
 
@@ -171,20 +175,21 @@ describe('User routes end-to-end flow', () => {
     const summary = await agent.get('/summary');
     const csrf5 = extractCsrf(summary.text);
 
-    // Force service failure
-    const original = applicationService.processApplicationFromFormData;
-    applicationService.processApplicationFromFormData = jest
-      .fn()
-      .mockRejectedValue(new Error('boom'));
+    // Use jest.spyOn for robust error mocking
+    const spy = jest
+      .spyOn(applicationService, 'processApplicationFromFormData')
+      .mockRejectedValueOnce(new Error('boom'));
 
     const res = await agent
       .post('/summary')
       .type('form')
       .send({ declaration: 'yes', _csrf: csrf5 });
 
-    applicationService.processApplicationFromFormData = original;
-
+    spy.mockRestore();
     expect(res.status).toBe(500);
-    expect(res.text).toMatch(/An error occurred while submitting your application/);
+    console.log('DEBUG ERROR RESPONSE:', res.text);
+    expect(res.text).toContain(
+      'An error occurred while submitting your application. Please try again.'
+    );
   });
 });
