@@ -47,15 +47,13 @@ FROM base AS production
 
 ENV NODE_ENV=production
 
-# Install production dependencies; install build tools temporarily for any native modules
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ libsqlite3-dev nginx \
+  && apt-get install -y --no-install-recommends python3 make g++ libsqlite3-dev \
   && npm ci --only=production \
   && apt-get purge -y --auto-remove python3 make g++ libsqlite3-dev \
   && rm -rf /var/lib/apt/lists/*
 
 
-# Copy the rest of the application code
 COPY . .
 
 # Copy GOV.UK Frontend assets to public for production
@@ -64,19 +62,12 @@ RUN mkdir -p public/govuk/assets/stylesheets public/govuk/assets/fonts public/go
   && cp -r node_modules/govuk-frontend/dist/govuk/assets/fonts public/govuk/assets/ \
   && cp -r node_modules/govuk-frontend/dist/govuk/assets/images public/govuk/assets/
 
-# Copy nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
-
 # Create necessary directories and set permissions
 RUN mkdir -p logs database \
   && chown -R node:node /app
 
-# Expose HTTP port
-EXPOSE 80
+# Expose app port
+EXPOSE 3000
 
-# Health check for Nginx
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost/ || exit 1
-
-# Start both Node.js and Nginx
-CMD ["sh", "-c", "npm start & nginx -g 'daemon off;'"]
+# Start Node.js app only
+CMD ["npm", "start"]
