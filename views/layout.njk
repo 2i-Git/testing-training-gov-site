@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Apply for an alcohol licence - GOV.UK{% endblock %}</title>
+    <title>{% block title %}Apply for an alcohol licence - Public sector training{% endblock %}</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
     <link rel="stylesheet" href="/govuk/assets/stylesheets/govuk-frontend.min.css">
     <!-- <link rel="stylesheet" href="/stylesheets/custom.css"> -->
 </head>
@@ -32,8 +34,15 @@
                 </nav>
             </div>
         </div>
-        </div>
     </header>
+    <div class="govuk-width-container">
+        <div class="govuk-phase-banner">
+            <p class="govuk-phase-banner__content">
+                <strong class="govuk-tag govuk-phase-banner__content__tag">Training</strong>
+                <span class="govuk-phase-banner__text">This is a training application for testing purposes only. Do not enter real credentials or personal data.</span>
+            </p>
+        </div>
+    </div>
     {% block content %}{% endblock %}
     <footer class="govuk-footer" role="contentinfo">
         <div class="govuk-width-container">

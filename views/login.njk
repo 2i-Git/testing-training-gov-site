@@ -2,6 +2,9 @@
 {% block content %}
 <div class="govuk-width-container">
     <h1 class="govuk-heading-l govuk-!-margin-top-2">Sign in</h1>
+    <div class="govuk-inset-text govuk-!-margin-bottom-4">
+        <strong>Training application:</strong> Do not enter real credentials or personal data. Use test/demo values only.
+    </div>
     {% if error %}
     <div class="govuk-error-summary" role="alert">
         <h2 class="govuk-error-summary__title">There is a problem</h2>
@@ -12,13 +15,6 @@
         </div>
     </div>
     {% endif %}
-        <div class="govuk-phase-banner">
-            <p class="govuk-phase-banner__content">
-                <strong class="govuk-tag govuk-phase-banner__content__tag">Training</strong>
-                <span class="govuk-phase-banner__text">This is a demonstration GOV.UK service for tester training. No real data is collected. Do not enter sensitive information.</span>
-            </p>
-        </div>
-        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-2">
     <form method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}">
         <div class="govuk-form-group">

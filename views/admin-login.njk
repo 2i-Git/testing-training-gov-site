@@ -2,6 +2,9 @@
 {% block content %}
 <div class="govuk-width-container">
     <h1 class="govuk-heading-xl">Admin Sign in</h1>
+    <div class="govuk-inset-text govuk-!-margin-bottom-4">
+        <strong>Training application:</strong> Do not enter real credentials or personal data. Use test/demo values only.
+    </div>
     {% if error or (errors and errors.length) %}
     <div class="govuk-error-summary" role="alert">
         <h2 class="govuk-error-summary__title">There is a problem</h2>
