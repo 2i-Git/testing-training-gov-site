@@ -9,6 +9,7 @@ const {
 const { asyncHandler } = require('../middleware/errorHandler');
 // Use the initialized applicationService from server.js
 let applicationService;
+let authService;
 const { rateLimiters } = require('../middleware/security');
 const { logger, logApplicationEvent } = require('../utils/logger');
 
@@ -16,10 +17,9 @@ const { logger, logApplicationEvent } = require('../utils/logger');
 // Export a function to inject dependencies
 module.exports = deps => {
   applicationService = deps.applicationService;
+  authService = deps.authService;
   return router;
 };
-
-const users = [{ email: 'user@example.com', password: 'password123' }];
 
 function requireAuth(req, res, next) {
   if (req.session && req.session.user) {
@@ -32,12 +32,16 @@ router.get('/login', (req, res) => {
   res.render('login', { csrfToken: res.locals.csrfToken });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const user = users.find(u => u.email === email && u.password === password);
-  if (user) {
-    req.session.user = { email: user.email };
-    return res.redirect('/personal-details');
+  try {
+    const user = await authService.findUserByEmail(email);
+    if (user && (await authService.verifyPassword(password, user.password_hash))) {
+      req.session.user = { id: user.id, email: user.email, role: user.role };
+      return req.session.save(() => res.redirect('/personal-details'));
+    }
+  } catch {
+    // fall through to render error
   }
   res.render('login', { error: 'Invalid email or password', csrfToken: res.locals.csrfToken });
 });

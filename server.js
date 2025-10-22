@@ -36,6 +36,7 @@ const config = require('./config/config');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const {
   securityHeaders,
+  robotsNoindexHeader,
   rateLimiters,
   sanitizeInput,
   csrfProtection
@@ -58,10 +59,29 @@ nunjucks.configure(['views', 'node_modules/govuk-frontend/dist'], {
 
 // Security middleware (must be first)
 app.use(securityHeaders); // Add security headers (HSTS, CSP, etc.)
+app.use(robotsNoindexHeader); // Also send X-Robots-Tag header (defense-in-depth)
 app.use(rateLimiters.general); // Rate limiting to prevent abuse
 
 // Session management for user state and CSRF protection
-app.use(session(config.session));
+// Use Postgres-backed session store when DATABASE_URL points to Postgres
+let sessionConfig = { ...config.session };
+try {
+  if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('postgres')) {
+    const PgSession = require('connect-pg-simple')(session);
+    sessionConfig.store = new PgSession({
+      conString: process.env.DATABASE_URL,
+      schemaName: undefined, // default
+      tableName: 'session',
+      createTableIfMissing: true
+    });
+  }
+} catch (e) {
+  console.error(
+    'Failed to initialize Postgres session store, falling back to MemoryStore:',
+    e.message
+  );
+}
+app.use(session(sessionConfig));
 app.use(requestLogger); // Log all incoming requests
 
 // Template engine setup
@@ -76,6 +96,12 @@ app.set('view engine', 'njk');
 app.use('/govuk/assets', express.static(path.join(__dirname, 'public/govuk/assets')));
 app.use(
   '/govuk/assets',
+  express.static(path.join(__dirname, 'node_modules/govuk-frontend/dist/govuk/assets'))
+);
+// Some GOV.UK CSS references expect assets under /assets; provide both paths
+app.use('/assets', express.static(path.join(__dirname, 'public/govuk/assets')));
+app.use(
+  '/assets',
   express.static(path.join(__dirname, 'node_modules/govuk-frontend/dist/govuk/assets'))
 );
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
@@ -113,8 +139,23 @@ app.get('/healthz', (req, res) => {
  * initialization order and makes testing easier.
  */
 const ApplicationService = require('./services/ApplicationService');
+const AuthService = require('./services/AuthService');
 const applicationService = new ApplicationService();
+const authService = new AuthService();
 const port = config.port || 3000;
+
+// Run DB migrations on startup (skip in test where setup orchestrates DB separately)
+const { migrateLatest, close: closeMigrationKnex } = require('./scripts/db');
+
+async function runMigrationsIfNeeded() {
+  if (process.env.NODE_ENV === 'test') return;
+  try {
+    await migrateLatest();
+  } finally {
+    // Close the temporary knex instance used for migrations
+    await closeMigrationKnex();
+  }
+}
 
 /**
  * Initialize application (services + routes) without starting the HTTP listener.
@@ -124,12 +165,15 @@ const port = config.port || 3000;
 async function initApp() {
   // Prevent double-initialization
   if (app.locals.initialized) return;
+  // Ensure schema is up-to-date before services access tables
+  await runMigrationsIfNeeded();
   await applicationService.initialize();
+  await authService.initialize();
 
   // Mount routes after initialization
-  const userRoutes = require('./routes/user')({ applicationService });
+  const userRoutes = require('./routes/user')({ applicationService, authService });
   app.use('/', userRoutes);
-  const adminRoutes = require('./routes/admin')({ applicationService });
+  const adminRoutes = require('./routes/admin')({ applicationService, authService });
   app.use('/admin', adminRoutes);
   const apiRoutes = require('./routes/api')({ applicationService });
   app.use('/api', apiRoutes);
@@ -172,6 +216,9 @@ process.on('SIGINT', async () => {
   console.log('\nReceived SIGINT, shutting down gracefully...');
   try {
     await applicationService.close();
+    if (authService && authService.close) {
+      await authService.close();
+    }
     process.exit(0);
   } catch (error) {
     logger.error('Error during shutdown', { error: error.message });
@@ -184,6 +231,9 @@ process.on('SIGTERM', async () => {
   console.log('\nReceived SIGTERM, shutting down gracefully...');
   try {
     await applicationService.close();
+    if (authService && authService.close) {
+      await authService.close();
+    }
     process.exit(0);
   } catch (error) {
     logger.error('Error during shutdown', { error: error.message });

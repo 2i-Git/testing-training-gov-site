@@ -3,8 +3,9 @@ const router = express.Router();
 const { asyncHandler } = require('../middleware/errorHandler');
 // Use the initialized applicationService from server.js
 let applicationService;
+let authService;
 
-const adminUsers = [{ email: 'admin@example.com', password: 'admin123' }];
+// Admin users are stored in the database (users.role = 'admin')
 
 function requireAdmin(req, res, next) {
   if (req.session && req.session.admin) {
@@ -17,12 +18,20 @@ router.get('/login', (req, res) => {
   res.render('admin-login', { csrfToken: res.locals.csrfToken });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const admin = adminUsers.find(u => u.email === email && u.password === password);
-  if (admin) {
-    req.session.admin = { email: admin.email };
-    return res.redirect('/admin/applications');
+  try {
+    const admin = await authService.findUserByEmail(email);
+    if (
+      admin &&
+      admin.role === 'admin' &&
+      (await authService.verifyPassword(password, admin.password_hash))
+    ) {
+      req.session.admin = { id: admin.id, email: admin.email };
+      return req.session.save(() => res.redirect('/admin/applications'));
+    }
+  } catch {
+    // fallthrough
   }
   res.render('admin-login', {
     error: 'Invalid email or password',
@@ -31,8 +40,9 @@ router.post('/login', (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-  req.session.admin = null;
-  res.redirect('/admin/login');
+  req.session.destroy(() => {
+    res.redirect('/admin/login');
+  });
 });
 
 router.get(
@@ -90,5 +100,6 @@ router.post(
 // Export a function to inject dependencies
 module.exports = deps => {
   applicationService = deps.applicationService;
+  authService = deps.authService;
   return router;
 };

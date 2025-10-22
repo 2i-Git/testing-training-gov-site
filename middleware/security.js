@@ -129,6 +129,13 @@ const securityHeaders = helmet({
   crossOriginEmbedderPolicy: false // Required for some GOV.UK components
 });
 
+// Defense-in-depth: ensure crawlers are told not to index via HTTP header as well
+const robotsNoindexHeader = (req, res, next) => {
+  // Explicitly instruct search engines not to index or follow links
+  res.set('X-Robots-Tag', 'noindex, nofollow');
+  next();
+};
+
 // CSRF protection middleware
 const csrfProtection = (req, res, next) => {
   // Skip CSRF for API endpoints in development
@@ -221,6 +228,7 @@ module.exports = {
   },
 
   securityHeaders,
+  robotsNoindexHeader,
   sanitizeInput,
   csrfProtection,
   requestLogger
