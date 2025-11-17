@@ -30,7 +30,7 @@ const config = require('../config/config');
  * @param {string} message - Custom message for rate limit exceeded
  * @returns {Function} Express middleware function
  */
-const createRateLimiter = (windowMs, max, message) => {
+const createRateLimiter = (windowMs, max, message, options = {}) => {
   return rateLimit({
     windowMs, // Time window for rate limiting
     max, // Maximum requests per window
@@ -41,8 +41,45 @@ const createRateLimiter = (windowMs, max, message) => {
     },
     standardHeaders: true, // Include rate limit info in standard headers
     legacyHeaders: false, // Don't include legacy rate limit headers
-    // Skip rate limiting in test environment to avoid interference with tests
-    skip: () => config.NODE_ENV === 'test'
+    // Per-user key when available, otherwise per-IP
+    keyGenerator: req => {
+      if (req.session && req.session.user && req.session.user.id) {
+        return `user:${req.session.user.id}`;
+      }
+      if (req.session && req.sessionID) {
+        return `sess:${req.sessionID}`;
+      }
+      return `ip:${req.ip}`;
+    },
+    // Skip rate limiting in test environment and when caller-provided skip says so
+    skip: (req, res) => {
+      if (config.NODE_ENV === 'test') return true;
+      if (typeof options.skip === 'function') {
+        try {
+          return !!options.skip(req, res);
+        } catch {
+          // ...existing code...
+          return false;
+        }
+      }
+      return false;
+    },
+    handler: (req, res, _next, _options) => {
+      const payload = {
+        success: false,
+        error: 'RATE_LIMIT_EXCEEDED',
+        message: message || 'Too many requests from this user, please try again later'
+      };
+
+      if (req.path && req.path.startsWith('/api/')) {
+        return res.status(429).json(payload);
+      }
+      return res.status(429).render('rate-limit', {
+        title: 'Too many requests',
+        statusCode: 429,
+        message: payload.message
+      });
+    }
   });
 };
 
@@ -186,6 +223,8 @@ const csrfProtection = (req, res, next) => {
 // Request logging middleware
 const requestLogger = (req, res, next) => {
   const start = Date.now();
+  // eslint-disable-next-line no-unused-vars
+  const _ = req.body._csrf || req.headers['x-csrf-token'];
 
   res.on('finish', () => {
     const duration = Date.now() - start;
@@ -211,19 +250,36 @@ module.exports = {
   // Rate limiters for different endpoints
   rateLimiters: {
     general: createRateLimiter(
-      config.security.rateLimitWindowMs,
-      config.security.rateLimitMax,
-      'Too many requests from this IP, please try again later'
+      config.security.general.windowMs,
+      config.security.general.max,
+      'Too many requests from this user, please try again later',
+      {
+        // Don't count static assets or safe methods to prevent navigation from burning quota
+        skip: req => {
+          const m = req.method;
+          if (m === 'GET' || m === 'HEAD' || m === 'OPTIONS') return true;
+          const p = req.path || '';
+          return (
+            p === '/healthz' ||
+            p === '/favicon.ico' ||
+            p.startsWith('/govuk/') ||
+            p.startsWith('/assets') ||
+            p.startsWith('/images') ||
+            p.startsWith('/css') ||
+            p.startsWith('/js')
+          );
+        }
+      }
     ),
     forms: createRateLimiter(
-      15 * 60 * 1000, // 15 minutes
-      10, // Max 10 form submissions per 15 minutes
-      'Too many form submissions, please try again later'
+      config.security.forms.windowMs,
+      config.security.forms.max,
+      'Too many form submissions for this user, please try again later'
     ),
     api: createRateLimiter(
-      60 * 1000, // 1 minute
-      30, // Max 30 API calls per minute
-      'API rate limit exceeded'
+      config.security.api.windowMs,
+      config.security.api.max,
+      'API rate limit exceeded for this user'
     )
   },
 

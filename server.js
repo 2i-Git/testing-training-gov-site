@@ -66,11 +66,15 @@ app.use(rateLimiters.general); // Rate limiting to prevent abuse
 // Use Postgres-backed session store when DATABASE_URL points to Postgres
 let sessionConfig = { ...config.session };
 try {
-  if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('postgres')) {
+  if (
+    process.env.NODE_ENV !== 'test' &&
+    process.env.DATABASE_URL &&
+    process.env.DATABASE_URL.startsWith('postgres')
+  ) {
     const PgSession = require('connect-pg-simple')(session);
     sessionConfig.store = new PgSession({
       conString: process.env.DATABASE_URL,
-      schemaName: undefined, // default
+      schemaName: undefined,
       tableName: 'session',
       createTableIfMissing: true
     });
@@ -177,6 +181,15 @@ async function initApp() {
   app.use('/admin', adminRoutes);
   const apiRoutes = require('./routes/api')({ applicationService });
   app.use('/api', apiRoutes);
+
+  // In tests, allow registering additional routes before error handlers
+  if (
+    process.env.NODE_ENV === 'test' &&
+    app.locals &&
+    typeof app.locals.registerTestRoutes === 'function'
+  ) {
+    app.locals.registerTestRoutes(app);
+  }
 
   // Error handlers last
   app.use(notFoundHandler);

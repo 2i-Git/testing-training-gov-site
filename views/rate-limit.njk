@@ -1,0 +1,35 @@
+{% extends "layout.njk" %}
+
+{% block title %}Too many requests - GOV.UK{% endblock %}
+
+{% block content %}
+<div class="govuk-width-container" id="main-content">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">Too many requests</h1>
+      <p class="govuk-body">You’ve made too many requests from this user. Please wait a while before trying again.</p>
+
+      <div class="govuk-inset-text">
+        <p class="govuk-body">If you are completing an application, your answers are saved in this session. You can return later and continue.</p>
+      </div>
+
+      <p class="govuk-body">You can:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><a class="govuk-link" href="/summary">return to your application summary</a></li>
+        <li><a class="govuk-link" href="/">go back to the start of the service</a></li>
+      </ul>
+
+      {% if statusCode and message %}
+      <details class="govuk-details" data-module="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">Technical details</span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body">Error {{ statusCode }}: {{ message }}</p>
+        </div>
+      </details>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

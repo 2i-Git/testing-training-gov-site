@@ -68,7 +68,6 @@ router.get('/personal-details', requireAuth, (req, res) => {
 router.post(
   '/personal-details',
   requireAuth,
-  rateLimiters.forms,
   personalDetailsValidation,
   asyncHandler(async (req, res) => {
     if (req.validationErrors) {
@@ -99,7 +98,6 @@ router.get('/business-details', requireAuth, (req, res) => {
 router.post(
   '/business-details',
   requireAuth,
-  rateLimiters.forms,
   businessDetailsValidation,
   asyncHandler(async (req, res) => {
     if (req.validationErrors) {
@@ -126,7 +124,6 @@ router.get('/license-details', requireAuth, (req, res) => {
 router.post(
   '/license-details',
   requireAuth,
-  rateLimiters.forms,
   licenseDetailsValidation,
   asyncHandler(async (req, res) => {
     if (req.validationErrors) {

@@ -116,7 +116,7 @@ typings/
 
 # gatsby files
 .cache/
-public
+public/govuk
 
 # vuepress build output
 .vuepress/dist

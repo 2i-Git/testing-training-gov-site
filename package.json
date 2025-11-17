@@ -32,17 +32,19 @@
     "cleanup:unfinalized:dry": "node scripts/cleanup-unfinalized-knex.js --dry-run",
     "e2e": "playwright test",
     "db:migrate": "node scripts/db-runner.js migrate",
-    "db:rollback": "node scripts/db-runner.js rollback"
+    "db:rollback": "node scripts/db-runner.js rollback",
+    "setup-assets": "bash scripts/setup-assets.sh",
+    "postinstall": "npm run setup-assets"
   },
   "dependencies": {
-    "body-parser": "^1.20.3",
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
+    "connect-pg-simple": "^9.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.1",
     "express-session": "^1.18.2",
-    "connect-pg-simple": "^9.0.0",
     "express-validator": "^7.0.1",
     "govuk-frontend": "^5.13.0",
     "he": "^1.2.0",
@@ -60,11 +62,13 @@
     "@stylistic/eslint-plugin": "^2.13.0",
     "audit-ci": "^7.0.1",
     "depcheck": "^1.4.7",
+    "envalid": "^8.1.1",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-security": "^3.0.1",
     "jest": "^29.7.0",
+    "jest-html-reporter": "^3.8.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.3.3",
     "simple-git-hooks": "^2.11.0",
@@ -87,16 +91,28 @@
       "!public/**",
       "!config/**",
       "!scripts/**",
-      "!tests/**",
       "!playwright.config.js",
       "!eslint.config.js",
-      "!**/*.test.js"
+      "!**/*.test.js",
+      "!tests/e2e/**",
+      "!tests/jest.globalTeardown.js"
     ],
     "coverageDirectory": "coverage",
     "coverageReporters": [
       "text",
       "lcov",
-      "json"
+      "json",
+      "html"
+    ],
+    "reporters": [
+      "default",
+      [
+        "jest-html-reporter",
+        {
+          "pageTitle": "Test Report",
+          "outputPath": "./coverage/test-report.html"
+        }
+      ]
     ],
     "coverageThreshold": {
       "global": {

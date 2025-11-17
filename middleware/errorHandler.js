@@ -190,7 +190,7 @@ const rateLimitHandler = (req, res) => {
   const error = {
     success: false,
     error: 'RATE_LIMIT_EXCEEDED',
-    message: 'Too many requests, please try again later'
+    message: 'Too many requests from this user, please try again later'
   };
 
   if (req.path.startsWith('/api/')) {
@@ -198,8 +198,8 @@ const rateLimitHandler = (req, res) => {
   }
 
   // For form requests, render error page
-  res.status(429).render('error', {
-    title: 'Rate Limit Exceeded',
+  res.status(429).render('rate-limit', {
+    title: 'Too many requests',
     statusCode: 429,
     message: error.message
   });

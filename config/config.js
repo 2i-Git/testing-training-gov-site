@@ -25,17 +25,23 @@ const path = require('path');
 // Load environment variables from .env file
 require('dotenv').config();
 
+// Helper to parse integers from env allowing 0 as a valid value
+function parseIntAllowZero(value, defaultValue) {
+  const n = Number.parseInt(value, 10);
+  return Number.isFinite(n) ? n : defaultValue;
+}
+
 const config = {
   // Environment and Server Configuration
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT) || 3000,
+  PORT: parseIntAllowZero(process.env.PORT, 3000),
 
   // Database Configuration
   // Database configuration: Prefer Postgres via DATABASE_URL; fallback to SQLite path
   database: {
     url: process.env.DATABASE_URL || '',
     path: process.env.DB_PATH || path.join(__dirname, '../database/alcohol_license.db'),
-    connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10
+    connectionLimit: parseIntAllowZero(process.env.DB_CONNECTION_LIMIT, 10)
   },
 
   // Session Management Configuration
@@ -48,7 +54,7 @@ const config = {
     cookie: {
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
       httpOnly: true, // Prevent XSS attacks by blocking client-side access
-      maxAge: parseInt(process.env.SESSION_MAX_AGE) || 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+      maxAge: parseIntAllowZero(process.env.SESSION_MAX_AGE, 24 * 60 * 60 * 1000), // 24 hours in milliseconds
       sameSite: 'strict' // CSRF protection - restrict cross-site requests
     }
   },
@@ -56,8 +62,18 @@ const config = {
   // Security Configuration
   // Rate limiting and CORS settings to prevent abuse
   security: {
-    rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX) || 100, // Max requests per window
+    general: {
+      windowMs: parseIntAllowZero(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000), // 15 minutes
+      max: parseIntAllowZero(process.env.RATE_LIMIT_MAX, 100) // Max requests per window
+    },
+    forms: {
+      windowMs: parseIntAllowZero(process.env.FORMS_RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
+      max: parseIntAllowZero(process.env.FORMS_RATE_LIMIT_MAX, 10)
+    },
+    api: {
+      windowMs: parseIntAllowZero(process.env.API_RATE_LIMIT_WINDOW_MS, 60 * 1000),
+      max: parseIntAllowZero(process.env.API_RATE_LIMIT_MAX, 30)
+    },
     corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000' // Allowed CORS origins
   },
 
