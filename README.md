@@ -107,91 +107,81 @@ npm start
 docker compose up -d
 ```
 
+## Local Asset Setup
+
+After running `npm install`, run:
+
+```bash
+npm run setup-assets
+```
+
+This will copy GOV.UK Frontend assets and your logo to the correct locations for local development.
+
 ## 📚 API Documentation
 
 ### Health Check
 
 - **GET** `/api/health` - Check API and database health status
 
-### Applications
+# Alcohol License Training App
 
-- **GET** `/api/applications` - Retrieve all applications (with pagination)
-- **GET** `/api/applications/:id` - Get specific application by ID
-- **POST** `/api/applications` - Create new application
-- **PATCH** `/api/applications/:id/status` - Update application status
-- **DELETE** `/api/applications/:id` - Delete application
+A realistic government alcohol license application for tester training. Includes GOV.UK Design System UI, multi-step forms, admin/admin API, SQLite DB, security middleware, and full test coverage.
 
-### Admin Panel
+## Quick Start
 
-- **GET** `/admin/login` - Admin login page
-- **POST** `/admin/login` - Admin authentication
-- **GET** `/admin/dashboard` - Admin dashboard
-- **GET** `/admin/applications` - Application management interface
+### Local Development
 
-## 🏗️ Architecture
-
-### Project Structure
-
-```
-testing-training-gov-site/
-├── 📁 config/                 # Configuration management
-│   └── config.js              # Centralized app configuration
-├── 📁 database/               # Database layer
-│   └── knex-database.js       # Knex-based database adapter (SQLite/Postgres)
-├── 📁 middleware/             # Express middleware
-│   ├── errorHandler.js        # Error handling and custom errors
-│   ├── security.js            # Security middleware (CSRF, rate limiting)
-│   └── validation.js          # Input validation middleware
-├── 📁 routes/                 # Route handlers
-│   ├── admin.js               # Admin panel routes
-│   ├── api.js                 # API endpoints
-│   └── user.js                # User journey routes
-├── 📁 services/               # Business logic layer
-│   └── ApplicationService.js  # Application business logic
-├── 📁 utils/                  # Utility functions
-│   └── logger.js              # Winston logging configuration
-├── 📁 views/                  # Nunjucks templates
-│   ├── layouts/               # Base templates
-│   ├── components/            # Reusable components
-│   └── pages/                 # Page templates
-├── 📁 public/                 # Static assets
-│   ├── css/                   # Stylesheets
-│   ├── js/                    # Client-side JavaScript
-│   ├── images/                # Images and icons
-│   └── govuk/                 # GOV.UK Design System assets
-├── 📁 tests/                  # Test files
-├── 📁 logs/                   # Application logs
-├── 📄 server.js               # Main application entry point
-├── 📄 package.json            # Node.js dependencies and scripts
-├── 📄 Dockerfile              # Docker container configuration
-├── 📄 docker-compose.yml      # Docker Compose configuration
-└── 📄 README.md               # This file
+```bash
+git clone <repository-url>
+cd testing-training-gov-site
+npm install
+cp .env.example .env
+npm run setup-assets   # Copies GOV.UK assets and logo
+npm run db:migrate    # Optional: run DB migrations
+npm start            # Or npm run dev for hot reload
 ```
 
-### Technology Stack
+### Docker
 
-#### Backend
+```bash
+docker build -t alcohol-license-app .
+docker run -p 3000:3000 alcohol-license-app
+```
 
-- **Node.js** (v18+) - JavaScript runtime
-- **Express.js** (v4+) - Web application framework
-- **SQLite** (v3) - Embedded database
-- **Nunjucks** - Template engine
-- **Winston** - Logging framework
+## Main Scripts
 
-#### Frontend
+- `npm start` / `npm run dev` — Start server
+- `npm run setup-assets` — Copy GOV.UK assets and logo
+- `npm run db:migrate` — Run DB migrations
+- `npm test` / `npm run test:coverage` — Run tests
+- `npm run lint` / `npm run lint:fix` — Lint code
 
-- **GOV.UK Design System** - UI components and styling
-- **Nunjucks** - Server-side template rendering
-- **Vanilla JavaScript** - Client-side functionality
-- **Responsive CSS** - Mobile-first design
+## Asset Setup
 
-#### Security & Middleware
+After `npm install`, always run:
 
-- **express-session** - Session management
-- **csurf** - CSRF protection
-- **express-rate-limit** - Rate limiting
-- **helmet** - Security headers
-- **express-validator** - Input validation
+```bash
+npm run setup-assets
+```
+
+## Docker Compose
+
+```bash
+docker compose up -d
+docker compose logs -f
+docker compose down
+```
+
+## Troubleshooting
+
+- **Assets missing?** Run `npm run setup-assets` again.
+- **DB errors?** Run `npm run db:migrate` or check `.env` DB path.
+- **Port in use?** Change `PORT` in `.env` or kill process using it.
+- **Tests failing?** Run `npm install` and `npm run setup-assets` before tests.
+
+## License
+
+MIT — Educational and training use only.
 
 #### Development & Deployment
 

@@ -33,8 +33,7 @@
     "e2e": "playwright test",
     "db:migrate": "node scripts/db-runner.js migrate",
     "db:rollback": "node scripts/db-runner.js rollback",
-    "setup-assets": "bash scripts/setup-assets.sh",
-    "postinstall": "npm run setup-assets"
+    "setup-assets": "bash scripts/setup-assets.sh"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
