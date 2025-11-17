@@ -56,11 +56,8 @@ RUN apt-get update \
 
 COPY . .
 
-# Copy GOV.UK Frontend assets to public for production
-RUN mkdir -p public/govuk/assets/stylesheets public/govuk/assets/fonts public/govuk/assets/images \
-  && cp node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.css public/govuk/assets/stylesheets/ \
-  && cp -r node_modules/govuk-frontend/dist/govuk/assets/fonts public/govuk/assets/ \
-  && cp -r node_modules/govuk-frontend/dist/govuk/assets/images public/govuk/assets/
+# Run asset setup script to copy GOV.UK Frontend assets and logo
+RUN bash scripts/setup-assets.sh
 
 # Create necessary directories and set permissions
 RUN mkdir -p logs database \
